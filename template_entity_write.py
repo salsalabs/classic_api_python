@@ -1,5 +1,5 @@
-# App to modify the HTML content of an email blast with something
-# that contains less-thans and greater-thans.
+# App to modify the HTML content of a web template to something
+# that contains SalsaScript.
 
 import requests
 s = requests.Session()
