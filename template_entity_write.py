@@ -8,9 +8,9 @@ s = requests.Session()
 email = 'aleonard@basledi.com'
 password = 'extra-super-secret-password'
 host = 'https://wfc2.wiredforchange.com'
-content = '<p><? var x = 1; if ( x > 1 && x < 2) { x = 3; } ?>'
-table = 'email_blast'
-key = 54898
+content = '\n<p><? var x = 1; if ( x > 1 && x < 2) { x = 3; } ?>\n'
+table = 'template'
+key = 13761
 
 # Authenticate
 payload = { 'email': email, 'password': password, 'json': True }
@@ -23,15 +23,16 @@ if j['status'] == 'error':
 
 print("Authentication: ", j)
 
-# Read the HTML content from the email blast victim.
+# Read the HTML content from the template victim.
 payload = {'json': True, 'object': table, 'key': key }
 u = host + '/api/getObject.sjs'
 r = s.get(u, params=payload)
 j = r.json()
-print("Read blast: HTML content is ", j['HTML_Content'])
+print("Read template: HTML content is ", j['Content'])
 
 # Modify and save the HTML content.
-payload['HTML_Content'] = j['HTML_Content'] + content
+x = j['Content'].split("</body>")
+payload['Content'] = x[0] + content + '</body>' + x[1]
 u = host + '/save'
 r = s.post(u, data=payload)
 print("Save: ", r.json())
@@ -41,4 +42,4 @@ payload = {'json': True, 'object': table, 'key': key }
 u = host + '/api/getObject.sjs'
 r = s.get(u, params=payload)
 j = r.json()
-print("Confirmation: HTML content is ", j['HTML_Content'])
+print("Confirmation: content is ", j)
