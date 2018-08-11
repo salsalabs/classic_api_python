@@ -1,14 +1,14 @@
-*Salsa Classic API in Python*
+## Salsa Classic API in Python
 
 This is a repository of samples getting and saving data from Salsa Classic using
 Python3 to manipulate the Classic API.  These are samples and are not guaranteed
 to be excellent Python.
 
-*Intstallation*
+## Installation
 
-There are two ways to install.  
+There are two ways to install.
 
-The first is to use git to clone the repository.  Generally, developers find this to 
+The first is to use git to clone the repository.  Generally, developers find this to
 be a helpful activity since their versions of this software can be updated when this
 library changes.
 
@@ -19,10 +19,10 @@ demonstrates how to download a ZIP of any archive.
 
 Once the zip is downloaded, unzip it to see the contents.
 
-*Configuration*
+## Configuration
 
 The sample apps were written to involve as few external libraries as necessary.  At this
-writing, the only libraries that the examples needs are `requests` to read from the web and 
+writing, the only libraries that the examples needs are `requests` to read from the web and
 `pyyaml` for reading login information .
 
 We'll presume that you are using Python 2.7.x.  Open a console and type
@@ -39,7 +39,7 @@ pip install pyyaml --user
 ```
 A lot of text will go by and the library will be installed.
 
-*Credentials*
+## Credentials*
 
 These applications require Salsa Classic campaign manager credentials.  The apps read from a YAML file.
 Here's a sample YAML credentials file.
@@ -53,7 +53,9 @@ password: your-salsa-password
 The `email` and `password` are the ones that you use to log into Salsa Classic.  You can find the `host`
 by [clicking here](https://help.salsalabs.com/hc/en-us/articles/115000341773-Salsa-Application-Program-Interface-API-#api_host).
 
-*Execution*
+It's a pretty good idea to create a directory named `logins` to use to store credentials.  That puts them out of the way of the source and makes it easy to use more than one set of credentials.
+
+## Execution
 
 The samples generally use a form like this.
 
@@ -63,6 +65,6 @@ python app.py --login YAML_FILE
 
 where `YAML_FILE` is the file that contains your login credentials.
 
-*Questions?  Comments?*
+## Questions?  Comments?
 
 Please use the `Issues` tab at the top of this page.
