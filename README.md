@@ -39,7 +39,7 @@ pip install pyyaml --user
 ```
 A lot of text will go by and the library will be installed.
 
-## Credentials*
+## Credentials
 
 These applications require Salsa Classic campaign manager credentials.  The apps read from a YAML file.
 Here's a sample YAML credentials file.
