@@ -72,11 +72,11 @@ python read_supporters.py --login logins/my_login.yaml
 ```
 And here's an example of the output.
 
-{code}
+```
 ('Authentication: ', {u'status': u'success', u'message': u'Successful Login', u'jsessionid': u'F735247AF8E35073AF6FDE1FC23D1AE2-n2'})
 58945835  Bob        Mintlet     Bmint99@mintyfresh.bizi
 58825855  Bob        Trelbeck   Bob@trelbeck.bizi
-{code}
+```
 
 ## Questions?  Comments?
 
