@@ -53,7 +53,7 @@ password: your-salsa-password
 The `email` and `password` are the ones that you use to log into Salsa Classic.  You can find the `host`
 by [clicking here](https://help.salsalabs.com/hc/en-us/articles/115000341773-Salsa-Application-Program-Interface-API-#api_host).
 
-It's a pretty good idea to create a directory named `logins` to use to store credentials.  That puts them out of the way of the source and makes it easy to use more than one set of credentials.
+It's a pretty good idea to create a directory named `logins` to use to store credentials.  That puts them out of the way of the source and makes it easy to use more than one set of credentials.  It's also a good idea to make sure that the file's name ends in ".yaml".  
 
 ## Execution
 
@@ -64,6 +64,19 @@ python app.py --login YAML_FILE
 ```
 
 where `YAML_FILE` is the file that contains your login credentials.
+
+For example, let's say that your login information is in `logins/my_login.yaml` and you want to run the sample app that reads supporters.  Here's a command that you can use:
+
+```bash
+python read_supporters.py --login logins/my_login.yaml
+```
+And here's an example of the output.
+
+{code}
+('Authentication: ', {u'status': u'success', u'message': u'Successful Login', u'jsessionid': u'F735247AF8E35073AF6FDE1FC23D1AE2-n2'})
+58945835  Bob        Mintlet     Bmint99@mintyfresh.bizi
+58825855  Bob        Trelbeck   Bob@trelbeck.bizi
+{code}
 
 ## Questions?  Comments?
 
