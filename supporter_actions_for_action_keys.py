@@ -8,8 +8,6 @@ import json
 parser = argparse.ArgumentParser(description='Read supporters')
 parser.add_argument('--login', dest='loginFile', action='store',
                     help='YAML file with login credentials')
-parser.add_argument('--pretty', dest='pretty', action='store_true',
-                    help='Output pretty JSON. See PyYaml. Default is unformatted.')
 
 args = parser.parse_args()
 cred = yaml.load(open(args.loginFile))
@@ -28,13 +26,23 @@ if j['status'] == 'error':
     exit(1)
 
 # Read the HTML content from the email blast victim.
-payload = {'json': True,
-    'object': 'supporter',
-    'condition': 'First_Name=Bob' }
+payload = {
+    'object': 'supporter_action',
+    'condition': 'action_KEY IN 15942,15943,18140,23426',
+    'include': 'supporter_action_KEY,organization_KEY,supporter_KEY,action_KEY',
+    'json': True }
 u = 'https://'+ cred['host'] +'/api/getObjects.sjs'
+print(u)
 r = s.get(u, params=payload)
 j = r.json()
-if args.pretty:
-    print(json.dumps(j, indent=4, sort_keys=True))
-else:
-    print(j)
+print(json.dumps(j, indent=4, sort_keys=True))
+
+f = '{:10}{:10} {:10} {:10}'
+for supporter_action in j:
+    print(f.format(supporter_action["supporter_action_KEY"],
+        supporter_action["organization_KEY"],
+        supporter_action["supporter_KEY"],
+        supporter_action["action_KEY"]))
+
+# Do you want to traverse the XML?  Yes?
+# Cool! Click here https://www.geeksforgeeks.org/xml-parsing-python/
