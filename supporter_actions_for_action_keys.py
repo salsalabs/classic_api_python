@@ -25,7 +25,9 @@ if j['status'] == 'error':
     print('Authentication failed: ', j)
     exit(1)
 
-# Read the HTML content from the email blast victim.
+# Read a list of supporters that match the criteria.  Please note that Salsa
+# will return no more than 500 records.  To see more than that you'll need
+# to do some looping.
 payload = {
     'object': 'supporter_action',
     'condition': 'action_KEY IN 15942,15943,18140,23426',
