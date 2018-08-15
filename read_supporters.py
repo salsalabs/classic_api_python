@@ -1,4 +1,6 @@
-# App to read some supporters via the Classic API.
+# App to read some supporters via the Classic API.  API output is a JSON buffer.
+# The `requests` package automatically converts that to a dictionary.  The output uses
+# the dictionary to display a few fields from each record found.
 import argparse
 import requests
 import yaml
@@ -27,16 +29,21 @@ if j['status'] == 'error':
 
 print('Authentication: ', j)
 
-# Read the HTML content from the email blast victim.
+# Read the content for supporters that match the `condition`.  That generally
+# results in at least a few records.  Change the name if there aren't any Bobs
+# in your supporter list.
 payload = {'json': True,
     'object': 'supporter',
     'condition': 'First_Name=Bob',
     'include': 'supporter_KEY,First_Name,Last_Name,Email' }
 u = 'https://'+ cred['host'] +'/api/getObjects.sjs'
 r = s.get(u, params=payload)
-j = r.json()
-f = '{:10}{:10} {:10} {:20}'
 
+# This automatcally converts the JSON buffer to an array of dictionaries.
+j = r.json()
+
+# Iterate through the hashes and display essential parts of the record.
+f = '{:10}{:10} {:10} {:20}'
 for supporter in j:
     print(f.format(supporter["supporter_KEY"],
         supporter["First_Name"],
