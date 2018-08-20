@@ -103,3 +103,8 @@ ENV/
 # Logins and login directories.
 logins
 *.yaml
+
+# Mac-specific files
+.DS_Store
+*/.DS_Store
+
