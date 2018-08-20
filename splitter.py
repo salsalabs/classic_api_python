@@ -4,48 +4,96 @@
 # exported, then export the rest as a CSV.  This app also exports donations, groups,
 # actions and events for the supporters.  
 import argparse
-import requests
-import yaml
+import csv
 import json
 import Queue
+import requests
 import threading
 import time
+import yaml
 
 exitFlag = 0
 
-
-class myThread (threading.Thread):
-    def __init__(self, threadID, name, q):
+class driveThread (threading.Thread):
+    def __init__(self, threadID, s, cond, qOut, qOutLock):
         threading.Thread.__init__(self)
         self.threadID = threadID
-        self.name = name
-        self.q = q
+        self.threadName = "drive"
+        self.queue=qOut
+        self.queueLock = qOutLock
     def run(self):
-        print "Starting " + self.name
-        self.process_data(self.name, self.q)
-        print "Exiting " + self.name
+        print("Starting " + self.threadName)
+        self.process_data()
+        print("Ending  " + self.threadName)
+        exitFlag = True
+    def process_data(self):
+        offset = 0
+        count = 500
+        while count == 500:
+            payload = {'json': True,
+                "limit": "%d,%d" % (offset, count),
+                'object': 'supporter',
+                'condition': cond,
+                'include': 'supporter_KEY,First_Name,Last_Name,Email' }
+            u = 'https://'+ cred['host'] +'/api/getObjects.sjs'
+            r = s.get(u, params=payload)
 
-    def process_data(self, threadName, q):
+            # This automatcally converts the JSON buffer to an array of dictionaries.
+            j = r.json()
+
+            # Iterate through the hashes and push them onto the supporter queue.
+            for supporter in j:
+                self.queueLock.acquire()
+                self.queue.put(supporter)
+                self.queueLock.release()
+                print("%s: %s" % (self.threadName, supporter["supporter_KEY"]))
+
+            count = 0 # len(a)
+            offset = offset + count
+
+class suppThread (threading.Thread):
+    def __init__(self, threadID, q, qLock):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.threadName = "supp"
+        self.queue=q
+        self.queueLock = qLock
+    def run(self):
+        print("Starting " + self.threadName)
+        self.process_data()
+        print("Ending  " + self.threadName)
+    def process_data(self):
+        f = '{:10}{:10} {:10} {:20}'
         while not exitFlag:
-            queueLock.acquire()
-            if not workQueue.empty():
-                data = q.get()
-                queueLock.release()
-                print "%s processing %s" % (threadName, data)
+            self.queueLock.acquire()
+            if not self.queue.empty():
+                supporter = self.queue.get()
+                self.queueLock.release()
+                print(f.format(supporter["supporter_KEY"],
+                    supporter["First_Name"],
+                    supporter["Last_Name"],
+                    supporter["Email"]
+                    ))
             else:
-                queueLock.release()
-            time.sleep(1)
+                self.queueLock.release()
 
-threadList = ["Thread-1", "Thread-2", "Thread-3"]
-nameList = ["One", "Two", "Three", "Four", "Five"]
+def authenticate(cred, s):
+    # Authenticate with Salsa.  Errors are fatal.
+    payload = {
+        'email': cred['email'],
+        'password': cred['password'],
+        'json': True }
+    u = 'https://' + cred['host'] + '/api/authenticate.sjs'
+    r = s.get(u, params=payload)
+    j = r.json()
+    if j['status'] == 'error':
+        print('Authentication failed: ', j)
+        exit(1)
+
+    print('Authentication: ', j)
+
 supporterQueue = Queue.Queue(100)
-groupQueue = Queue.Queue(100)
-donationQueue = Queue.Queue(100)
-actionQueue = Queue.Queue(100)
-eventQueue = Queue.Queue(100)
-
-queueLock = threading.Lock()
-workQueue = Queue.Queue(10)
+supporterQueueLock = threading.Lock()
 threads = []
 threadID = 1
 
@@ -53,44 +101,23 @@ threadID = 1
 parser = argparse.ArgumentParser(description='Read supporters')
 parser.add_argument('--login', dest='loginFile', action='store',
                     help='YAML file with login credentials')
+cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&condition=Receive_Email>0'
 
 args = parser.parse_args()
 cred = yaml.load(open(args.loginFile))
-
-# Authenticate
-payload = {
-    'email': cred['email'],
-    'password': cred['password'],
-    'json': True }
 s = requests.Session()
-u = 'https://' + cred['host'] + '/api/authenticate.sjs'
-r = s.get(u, params=payload)
-j = r.json()
-if j['status'] == 'error':
-    print('Authentication failed: ', j)
-    exit(1)
+authenticate(cred, s)
+# sample(cred, s)
 
-print('Authentication: ', j)
+t = suppThread(threadID, supporterQueue, supporterQueueLock)
+t.start()
+threads.append(t)
+threadID += 1
 
-# Create new threads
-for tName in threadList:
-    thread = myThread(threadID, tName, workQueue)
-    thread.start()
-    threads.append(thread)
-    threadID += 1
-
-# Fill the queue
-queueLock.acquire()
-for word in nameList:
-    workQueue.put(word)
-queueLock.release()
-
-# Wait for queue to empty
-while not workQueue.empty():
-    pass
-
-# Notify threads it's time to exit
-exitFlag = 1
+t = driveThread(threadID, s, cond, supporterQueue, supporterQueueLock)
+t.start()
+threads.append(t)
+threadID += 1
 
 # Wait for all threads to complete
 for t in threads:
