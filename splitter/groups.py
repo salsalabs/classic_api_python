@@ -1,4 +1,5 @@
 import csv
+import re
 import threading
 
 
@@ -7,7 +8,7 @@ class GroupsReader (threading.Thread):
     # to, then write individual (group_Name, email) records to the output
     # queue
 
-    def __init__(self, cred, session, threadID, in1, out, exitFlag):
+    def __init__(self, threadID, cred, session, in1, out, exitFlag):
         threading.Thread.__init__(self)
         self.cred = cred
         self.session = session
@@ -30,7 +31,7 @@ class GroupsReader (threading.Thread):
             offset = 0
             count = 500
             while count == 500:
-                cond = "&condition=supporter_KEY=%s" % supporter["supporter_KEY"]
+                cond = "supporter_KEY=%s" % supporter["supporter_KEY"]
                 payload = {'json': True,
                            "limit": "%d,%d" % (offset, count),
                            'object': 'supporter_groups(groups_KEY)groups',
@@ -38,7 +39,14 @@ class GroupsReader (threading.Thread):
                            'include': 'groups.Group_Name'}
                 u = 'https://' + self.cred['host'] + '/api/getLeftJoin.sjs'
                 r = self.session.get(u, params=payload)
-                j = r.json()
+                print("Groups: read %s", r.text[0:100])
+                # Salsa returns "[{ }]" when there's no data.  That confuses the
+                # JSON parser...
+                m = re.match("\\{\\s+\\}", r.text)
+                if m:
+                    j = []
+                else:
+                    j = r.json()
 
                 # Iterate through the groups and push them onto the (groups,email)_
                 # queue.
