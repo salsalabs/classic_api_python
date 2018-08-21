@@ -1,4 +1,5 @@
 import csv
+import datetime
 import json
 import os
 import os.path
@@ -60,6 +61,8 @@ class DonationReader (threading.Thread):
                     if not donation:
                         continue
 
+                    print(("%s_%-2d: %s", self.threadName, self.threadID, json.dumps(donation)))
+
                     d = {}
                     for k, v in DonationMap.items():
                         if k == "supporter_KEY" or k == "Email":
@@ -69,6 +72,13 @@ class DonationReader (threading.Thread):
                             if k == "Transaction_Type":
                                 if d[k] != "Recurring":
                                     d[k] = "OneTime"
+                            if k == "Transaction_Date":
+                                f = "%a %b %d %Y %H:%M:%S"
+                                d = datetime.datetime.strptime(x, f)
+                                d[k] = d.strftime("%Y-%m-%d %H:%M:%S")
+                                #to get YYYY-mm-dd use
+                                #d[k] = d.isoformat()
+
                     self.out.put(d)
 
 
@@ -120,4 +130,5 @@ DonationMap = {
     "donation_KEY": "donation_KEY",
     "Transaction_Date": "Transaction_Date",
     "Amount": "amount",
-    "Transaction_Type": "Transaction_Type"}
+    "Transaction_Type": "Transaction_Type",
+    "Result": "RESULT"}
