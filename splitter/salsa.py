@@ -3,7 +3,7 @@ def Authenticate(cred, s):
     payload = {
         'email': cred['email'],
         'password': cred['password'],
-        'json': True }
+        'json': True}
     u = 'https://' + cred['host'] + '/api/authenticate.sjs'
     r = s.get(u, params=payload)
     j = r.json()
@@ -12,4 +12,3 @@ def Authenticate(cred, s):
         exit(1)
 
     print('Authentication: ', j)
-

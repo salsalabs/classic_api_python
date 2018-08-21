@@ -1,10 +1,12 @@
 import csv
 import threading
 
+
 class GroupsReader (threading.Thread):
     # Read supporters from a queue, find the groups that the supporter belongs
     # to, then write individual (group_Name, email) records to the output
     # queue
+
     def __init__(self, cred, session, threadID, in1, out, exitFlag):
         threading.Thread.__init__(self)
         self.cred = cred
@@ -14,10 +16,12 @@ class GroupsReader (threading.Thread):
         self.out = out
         self.exitFlag = exitFlag
         self.threadName = "readGroups"
+
     def run(self):
         print("Starting " + self.threadName)
         self.process_data()
         print("Ending   " + self.threadName)
+
     def process_data(self):
         while not self.exitFlag:
             supporter = self.in1.get()
@@ -26,29 +30,31 @@ class GroupsReader (threading.Thread):
             offset = 0
             count = 500
             while count == 500:
-                cond = "&condition=supporter_KEY=%d" % (supporter["supporter_KEY"])
+                cond = "&condition=supporter_KEY=%s" % supporter["supporter_KEY"]
                 payload = {'json': True,
-                    "limit": "%d,%d" % (offset, count),
-                    'object': 'supporter_groups(groups_KEY)groups',
-                    'condition': cond,
-                    'include': 'groups.Group_Name' }
-                u = 'https://'+ self.cred['host'] +'/api/getLeftJoin.sjs'
+                           "limit": "%d,%d" % (offset, count),
+                           'object': 'supporter_groups(groups_KEY)groups',
+                           'condition': cond,
+                           'include': 'groups.Group_Name'}
+                u = 'https://' + self.cred['host'] + '/api/getLeftJoin.sjs'
                 r = self.session.get(u, params=payload)
                 j = r.json()
 
                 # Iterate through the groups and push them onto the (groups,email)_
                 # queue.
                 for group in j:
-                    r = [ group.Group_Name, supporter.Email ]
+                    r = [group.Group_Name, supporter.Email]
                     self.out.put(r)
                     print("%s: %s" % (self.threadName, r))
 
             count = len(a)
             offset += count
 
+
 class GroupEmailSaver (threading.Thread):
         # Accepts (groupName, email) recvords from a queue and writes them to
         # a CSV file.
+
     def __init__(self, threadID, in1, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
@@ -61,12 +67,14 @@ class GroupEmailSaver (threading.Thread):
         fieldnames = str.split("Group,Email", ",")
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
         self.writer.writeheader()
+
     def run(self):
         print("Starting " + self.threadName)
         self.process_data()
         self.csvfile.flush()
         self.csvfile.close()
         print("Ending  " + self.threadName)
+
     def process_data(self):
         # f = '{:10}{:10} {:10} {:20}'
         while not self.exitFlag:

@@ -12,6 +12,7 @@ from queue import LockedQueue
 from salsa import Authenticate
 from supporter import SupporterReader, SupporterSaver
 
+
 def main():
     # The app starts here.
     exitFlag = False
@@ -44,13 +45,15 @@ def main():
     threads.append(t)
     threadID += 1
 
-    t = GroupsReader(threadID, cred, session, groupsQueue, groupsEmailQueue, exitFlag)
+    t = GroupsReader(threadID, cred, session, groupsQueue,
+                     groupsEmailQueue, exitFlag)
     t.start()
     threads.append(t)
     threadID += 1
 
     cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&condition=Receive_Email>0'
-    t = SupporterReader(threadID, cred, session, cond, supporterQueue, groupsQueue, exitFlag)
+    t = SupporterReader(threadID, cred, session, cond,
+                        supporterQueue, groupsQueue, exitFlag)
     t.start()
     threads.append(t)
     threadID += 1
@@ -63,4 +66,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
