@@ -6,7 +6,7 @@ class SupporterReader (threading.Thread):
     # Read supporter records at a nominal rate of500 per chunk. Output them
     # singly to the output queues.
 
-    def __init__(self, threadID, cred, session, cond, out1, out2, exitFlag):
+    def __init__(self, threadID, cred, session, cond, out1, out2, out3, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.cred = cred
@@ -14,6 +14,7 @@ class SupporterReader (threading.Thread):
         self.cond = cond
         self.out1 = out1
         self.out2 = out2
+        self.out3 = out3
         self.exitFlag = exitFlag
         self.threadName = "SupporterReader"
         x = []
@@ -46,6 +47,7 @@ class SupporterReader (threading.Thread):
             for supporter in j:
                 self.out1.put(supporter)
                 self.out2.put(supporter)
+                self.out3.put(supporter)
 
             count = len(j)
             offset += count

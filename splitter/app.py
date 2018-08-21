@@ -19,6 +19,8 @@ def main():
     supporterQueue = LockedQueue()
     groupsQueue = LockedQueue()
     groupsEmailQueue = LockedQueue()
+    donationQueue = LockedQueue()
+    donationSaveQueue = LockedQueue()
     threads = []
 
     # Get the login credentials
@@ -34,11 +36,19 @@ def main():
     # Login.  Die if the crednentials are wrong.
     Authenticate(cred, session)
 
+    t = DonationSaver(1, donationSaveQueue, exitFlag)
+    t.start()
+    threads.append(t)
+
     t = GroupEmailSaver(1, groupsEmailQueue, exitFlag)
     t.start()
     threads.append(t)
 
     t = SupporterSaver(1, supporterQueue, exitFlag)
+    t.start()
+    threads.append(t)
+
+    t = DonationReader(1, cred, session, donationQueue, donationSaveQueue, exitFlag)
     t.start()
     threads.append(t)
 
@@ -49,7 +59,7 @@ def main():
 
     cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&condition=Receive_Email>0'
     t = SupporterReader(1, cred, session, cond,
-                        supporterQueue, groupsQueue, exitFlag)
+                        supporterQueue, groupsQueue, donationsQueue, exitFlag)
     t.start()
     threads.append(t)
 
