@@ -1,5 +1,6 @@
 import csv
-import re
+import os
+import os.path
 import threading
 
 
@@ -58,14 +59,19 @@ class GroupEmailSaver (threading.Thread):
     # Accepts (groupName, email) recvords from a queue and writes them to
     # a CSV file.
 
-    def __init__(self, threadID, in1, exitFlag):
+    def __init__(self, threadID, in1, outDir, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "GroupEmailSaver"
         self.in1 = in1
+        self.outDir = outDir
         self.exitFlag = exitFlag
 
         fn = "groups_%02d.csv" % self.threadID
+        fn = os.path.join(outDir, fn)
+        d = os.path.dirname(fn)
+        if not os.path.exists(d):
+            os.makedirs(d)
         self.csvfile = open(fn, "w")
         fieldnames = str.split("Group,Email", ",")
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
@@ -79,7 +85,6 @@ class GroupEmailSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
-        # f = '{:10}{:10} {:10} {:20}'
         while not self.exitFlag:
             r = self.in1.get()
             if r and r["Group"] and r["Email"]:

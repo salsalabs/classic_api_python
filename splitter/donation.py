@@ -1,4 +1,7 @@
 import csv
+import json
+import os
+import os.path
 import re
 import threading
 
@@ -18,8 +21,9 @@ class DonationReader (threading.Thread):
         self.exitFlag = exitFlag
         self.threadName = "DonationReader"
         x = []
-        for k, v in SupporterMap.items():
-            x.append(v)
+        for k, v in DonationMap.items():
+            if v:
+                x.append(v)
         self.incl = ",".join(x)
 
     def run(self):
@@ -45,9 +49,17 @@ class DonationReader (threading.Thread):
                 r = self.session.get(u, params=payload)
                 j = r.json()
 
-                # Iterate through the donations and put them onto the donation saver
-                # queue.
+                count = len(j)
+                offset += count
+                if count == 0:
+                    continue
+
+                # Iterate through the donations, transmogrify as needed, then put them onto
+                # the donation saver queue.
                 for donation in j:
+                    if not donation:
+                        continue
+
                     d = {}
                     for k, v in DonationMap.items():
                         if k == "supporter_KEY" or k == "Email":
@@ -59,24 +71,28 @@ class DonationReader (threading.Thread):
                                     d[k] = "OneTime"
                     self.out.put(d)
 
-                count = len(j)
-                offset += count
-
 
 class DonationSaver (threading.Thread):
     # Accepts (groupName, email) recvords from a queue and writes them to
     # a CSV file.
 
-    def __init__(self, threadID, supQ, exitFlag):
+    def __init__(self, threadID, supQ, outDir, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "DonationSaver"
         self.supQ = supQ
+        self.outDir = outDir
         self.exitFlag = exitFlag
 
         fn = "donations_%02d.csv" % self.threadID
+        fn = os.path.join(outDir, fn)
+        d = os.path.dirname(fn)
+        if not os.path.exists(d):
+            os.makedirs(d)
         self.csvfile = open(fn, "w")
-        fieldnames = str.split("Group,Email", ",")
+        fieldnames = []
+        for k, v in DonationMap.items():
+            fieldnames.append(k)
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
         self.writer.writeheader()
 
@@ -88,9 +104,10 @@ class DonationSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
-        # f = '{:10}{:10} {:10} {:20}'
         while not self.exitFlag:
             r = self.supQ.get()
+            if not r:
+                continue
             try:
                 self.writer.writerow(r)
             except UnicodeEncodeError:
@@ -98,7 +115,7 @@ class DonationSaver (threading.Thread):
                        self.threadName, self.threadID, r))
 
 DonationMap = {
-    "Supporter_KEY": None,
+    "supporter_KEY": None,
     "Email": None,
     "donation_KEY": "donation_KEY",
     "Transaction_Date": "Transaction_Date",

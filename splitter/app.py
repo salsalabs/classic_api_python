@@ -7,6 +7,7 @@ import requests
 import time
 import yaml
 
+from donation import DonationReader, DonationSaver
 from groups import GroupsReader, GroupEmailSaver
 from lckqueue import LockedQueue
 from salsa import Authenticate
@@ -27,6 +28,9 @@ def main():
     parser = argparse.ArgumentParser(description='Read supporters')
     parser.add_argument('--login', dest='loginFile', action='store',
                         help='YAML file with login credentials')
+    parser.add_argument('--dir', dest='outputDir', action='store', default='./data',
+                        help='Store export files here')
+
 
     args = parser.parse_args()
     # Session to use for network I/O with automatic cookies.
@@ -36,15 +40,15 @@ def main():
     # Login.  Die if the crednentials are wrong.
     Authenticate(cred, session)
 
-    t = DonationSaver(1, donationSaveQueue, exitFlag)
+    t = DonationSaver(1, donationSaveQueue, args.outputDir, exitFlag)
     t.start()
     threads.append(t)
 
-    t = GroupEmailSaver(1, groupsEmailQueue, exitFlag)
+    t = GroupEmailSaver(1, groupsEmailQueue, args.outputDir, exitFlag)
     t.start()
     threads.append(t)
 
-    t = SupporterSaver(1, supporterQueue, exitFlag)
+    t = SupporterSaver(1, supporterQueue, args.outputDir, exitFlag)
     t.start()
     threads.append(t)
 
@@ -59,7 +63,7 @@ def main():
 
     cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&condition=Receive_Email>0'
     t = SupporterReader(1, cred, session, cond,
-                        supporterQueue, groupsQueue, donationsQueue, exitFlag)
+                        supporterQueue, groupsQueue, donationQueue, exitFlag)
     t.start()
     threads.append(t)
 

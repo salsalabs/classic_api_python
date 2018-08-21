@@ -1,5 +1,8 @@
 import csv
 import threading
+import os
+import os.path
+import threading
 
 
 class SupporterReader (threading.Thread):
@@ -56,14 +59,19 @@ class SupporterReader (threading.Thread):
 class SupporterSaver (threading.Thread):
     # Accepts supporter recvords from a queue and writes them to a CSV file.
 
-    def __init__(self, threadID, inbound, exitFlag):
+    def __init__(self, threadID, inbound, outDir, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "SupporterSaver"
         self.inbound = inbound
+        self.outDir = outDir
         self.exitFlag = exitFlag
 
         fn = "supporters_%02d.csv" % self.threadID
+        fn = os.path.join(outDir, fn)
+        d = os.path.dirname(fn)
+        if not os.path.exists(d):
+            os.makedirs(d)
         self.csvfile = open(fn, "w")
         fieldnames = []
         for k, v in SupporterMap.items():
