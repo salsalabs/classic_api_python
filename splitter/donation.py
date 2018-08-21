@@ -61,7 +61,7 @@ class DonationReader (threading.Thread):
                     if not donation:
                         continue
 
-                    print(("%s_%-2d: %s", self.threadName, self.threadID, json.dumps(donation)))
+                    print(("%s_%-2d: %s" % (self.threadName, self.threadID, json.dumps(donation))))
 
                     d = {}
                     for k, v in DonationMap.items():
@@ -78,9 +78,10 @@ class DonationReader (threading.Thread):
                                 x = datetime.datetime.strptime(x, f)
                                 d[k] = x.strftime("%Y-%m-%d %H:%M:%S")
                                 #to get YYYY-mm-dd use
-                                #d[k] = d.isoformat()
+                                #d[k] = x.isoformat()
 
                     self.out.put(d)
+                    print(("%s_%-2d: %s" % (self.threadName, self.threadID, json.dumps(d))))
 
 
 class DonationSaver (threading.Thread):
