@@ -15,17 +15,18 @@ import yaml
 exitFlag = 0
 
 class driveThread (threading.Thread):
-    def __init__(self, threadID, s, cond, qOut, qOutLock):
+    def __init__(self, threadID, s, cond, qOut, qOutLock, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "drive"
         self.queue=qOut
         self.queueLock = qOutLock
+        self.exitFlag = exitFlag
     def run(self):
         print("Starting " + self.threadName)
         self.process_data()
         print("Ending  " + self.threadName)
-        exitFlag = True
+        self.exitFlag = True
     def process_data(self):
         offset = 0
         count = 500
@@ -52,30 +53,45 @@ class driveThread (threading.Thread):
             offset = offset + count
 
 class suppThread (threading.Thread):
-    def __init__(self, threadID, q, qLock):
+    def __init__(self, threadID, q, qLock, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "supp"
         self.queue=q
         self.queueLock = qLock
+        self.exitFlag = exitFlag
+
+
+        fn = "supporters_%02d.csv" % self.threadID
+        self.csvfile = open(fn, "w")
+        fieldnames = str.split("supporter_KEY,First_Name,Last_Name,Email", ",")
+        self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
+        self.writer.writeheader()
     def run(self):
         print("Starting " + self.threadName)
         self.process_data()
+        self.csvfile.flush()
+        self.csvfile.close()
         print("Ending  " + self.threadName)
     def process_data(self):
-        f = '{:10}{:10} {:10} {:20}'
-        while not exitFlag:
-            self.queueLock.acquire()
-            if not self.queue.empty():
-                supporter = self.queue.get()
-                self.queueLock.release()
-                print(f.format(supporter["supporter_KEY"],
-                    supporter["First_Name"],
-                    supporter["Last_Name"],
-                    supporter["Email"]
-                    ))
-            else:
-                self.queueLock.release()
+        with open('supporters.csv', 'w') as csvfile:
+            f = '{:10}{:10} {:10} {:20}'
+            while not self.exitFlag:
+                self.queueLock.acquire()
+                if not self.queue.empty():
+                    supporter = self.queue.get()
+                    self.queueLock.release()
+                    # csv writer complains if there's stuff that's not going to be written
+                    del supporter['object']
+                    del supporter['key']
+                    # print(f.format(supporter["supporter_KEY"],
+                    #     supporter["First_Name"],
+                    #     supporter["Last_Name"],
+                    #     supporter["Email"]
+                    #     ))
+                    self.writer.writerow(supporter)
+                else:
+                    self.queueLock.release()
 
 def authenticate(cred, s):
     # Authenticate with Salsa.  Errors are fatal.
@@ -109,12 +125,17 @@ s = requests.Session()
 authenticate(cred, s)
 # sample(cred, s)
 
-t = suppThread(threadID, supporterQueue, supporterQueueLock)
+t = suppThread(threadID, supporterQueue, supporterQueueLock, exitFlag)
 t.start()
 threads.append(t)
 threadID += 1
 
-t = driveThread(threadID, s, cond, supporterQueue, supporterQueueLock)
+t = suppThread(threadID, supporterQueue, supporterQueueLock, exitFlag)
+t.start()
+threads.append(t)
+threadID += 1
+
+t = driveThread(threadID, s, cond, supporterQueue, supporterQueueLock, exitFlag)
 t.start()
 threads.append(t)
 threadID += 1
