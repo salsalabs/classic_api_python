@@ -83,4 +83,8 @@ class SupporterSaver (threading.Thread):
             # that's not going to be written
             del supporter['object']
             del supporter['key']
-            self.writer.writerow(supporter)
+            try:
+                self.writer.writerow(supporter)
+            except UnicodeEncodeError:
+                    print("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, supporter)
+

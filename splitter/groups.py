@@ -31,7 +31,7 @@ class GroupsReader (threading.Thread):
             offset = 0
             count = 500
             while count == 500:
-                cond = "supporter_KEY=%s" % supporter["supporter_KEY"]
+                cond = "supporter_KEY=%s&condition=Group_Name IS NOT EMPTY" % supporter["supporter_KEY"]
                 payload = {'json': True,
                            "limit": "%d,%d" % (offset, count),
                            'object': 'supporter_groups(groups_KEY)groups',
@@ -44,7 +44,7 @@ class GroupsReader (threading.Thread):
                 # Iterate through the groups and push them onto the (groups,email)_
                 # queue.
                 for group in j:
-                    r = [group["Group_Name"], supporter["Email"]]
+                    r = { "Group": group["Group_Name"], "Email": supporter["Email"] }
                     self.out.put(r)
 
                 count = len(j)
@@ -58,7 +58,7 @@ class GroupEmailSaver (threading.Thread):
     def __init__(self, threadID, in1, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
-        self.threadName = "ge"
+        self.threadName = "GroupEmailSaver"
         self.in1 = in1
         self.exitFlag = exitFlag
 
@@ -80,8 +80,8 @@ class GroupEmailSaver (threading.Thread):
         while not self.exitFlag:
             r = self.in1.get()
             if r:
-                # csv writer complains if there's stuff in the record
-                # that's not going to be written
-                del r['object']
-                del r['key']
-                self.writer.writerow(r)
+                try:
+                    self.writer.writerow(r)
+                except UnicodeEncodeError:
+                    print("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, r)
+
