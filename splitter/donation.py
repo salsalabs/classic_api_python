@@ -74,7 +74,7 @@ class DonationReader (threading.Thread):
                                     d[k] = "OneTime"
                             if k == "Transaction_Date":
                                 f = "%a %b %d %Y %H:%M:%S"
-                                d = datetime.datetime.strptime(x, f)
+                                d = datetime.datetime.strptime(d[k], f)
                                 d[k] = d.strftime("%Y-%m-%d %H:%M:%S")
                                 #to get YYYY-mm-dd use
                                 #d[k] = d.isoformat()
