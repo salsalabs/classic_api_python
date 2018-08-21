@@ -7,10 +7,10 @@ import requests
 import time
 import yaml
 
-from .groups import GroupsReader, GroupEmailSaver
-from .queue import LockedQueue
-from .salsa import Authenticate
-from .supporter import SupporterReader, SupporterSaver
+from groups import GroupsReader, GroupEmailSaver
+from lckqueue import LockedQueue
+from salsa import Authenticate
+from supporter import SupporterReader, SupporterSaver
 
 
 def main():
