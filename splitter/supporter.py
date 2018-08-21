@@ -15,7 +15,7 @@ class SupporterReader (threading.Thread):
         self.out1 = out1
         self.out2 = out2
         self.exitFlag = exitFlag
-        self.threadName = "drive"
+        self.threadName = "SupporterReader"
         x = []
         for k, v in SupporterMap.items():
             if v :
@@ -57,7 +57,7 @@ class SupporterSaver (threading.Thread):
     def __init__(self, threadID, inbound, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
-        self.threadName = "saveSupporters"
+        self.threadName = "SupporterSaver"
         self.inbound = inbound
         self.exitFlag = exitFlag
 

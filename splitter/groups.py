@@ -16,7 +16,7 @@ class GroupsReader (threading.Thread):
         self.in1 = in1
         self.out = out
         self.exitFlag = exitFlag
-        self.threadName = "readGroups"
+        self.threadName = "GroupsReader"
 
     def run(self):
         print(("Starting " + self.threadName))
