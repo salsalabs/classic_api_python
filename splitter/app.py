@@ -20,7 +20,6 @@ def main():
     groupsQueue = LockedQueue()
     groupsEmailQueue = LockedQueue()
     threads = []
-    threadID = 1
 
     # Get the login credentials
     parser = argparse.ArgumentParser(description='Read supporters')
@@ -35,28 +34,24 @@ def main():
     # Login.  Die if the crednentials are wrong.
     Authenticate(cred, session)
 
-    t = GroupEmailSaver(threadID, groupsEmailQueue, exitFlag)
+    t = GroupEmailSaver(1, groupsEmailQueue, exitFlag)
     t.start()
     threads.append(t)
-    threadID += 1
 
-    t = SupporterSaver(threadID, supporterQueue, exitFlag)
+    t = SupporterSaver(1, supporterQueue, exitFlag)
     t.start()
     threads.append(t)
-    threadID += 1
 
-    t = GroupsReader(threadID, cred, session, groupsQueue,
+    t = GroupsReader(1, cred, session, groupsQueue,
                      groupsEmailQueue, exitFlag)
     t.start()
     threads.append(t)
-    threadID += 1
 
     cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&condition=Receive_Email>0'
-    t = SupporterReader(threadID, cred, session, cond,
+    t = SupporterReader(1, cred, session, cond,
                         supporterQueue, groupsQueue, exitFlag)
     t.start()
     threads.append(t)
-    threadID += 1
 
     # Wait for all threads to complete
     for t in threads:
