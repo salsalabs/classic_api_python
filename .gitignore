@@ -108,3 +108,7 @@ logins
 .DS_Store
 */.DS_Store
 
+# Output files
+*.csv
+*.txt
+
