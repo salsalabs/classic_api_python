@@ -98,7 +98,7 @@ class SupporterSaver (threading.Thread):
             m = {}
             for k, v in SupporterMap.items():
                 if v:
-                    m[k] = supporter[v]
+                    m[k] = str.strip(supporter[v])
             try:
                 self.writer.writerow(m)
             except UnicodeEncodeError:
