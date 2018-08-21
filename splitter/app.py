@@ -61,7 +61,7 @@ def main():
     # Wait for all threads to complete
     for t in threads:
         t.join()
-    print "Exiting Main Thread"
+    print("Exiting Main Thread")
 
 
 if __name__ == "__main__":
