@@ -19,9 +19,9 @@ class GroupsReader (threading.Thread):
         self.threadName = "readGroups"
 
     def run(self):
-        print("Starting " + self.threadName)
+        print(("Starting " + self.threadName))
         self.process_data()
-        print("Ending   " + self.threadName)
+        print(("Ending   " + self.threadName))
 
     def process_data(self):
         while not self.exitFlag:
@@ -69,11 +69,11 @@ class GroupEmailSaver (threading.Thread):
         self.writer.writeheader()
 
     def run(self):
-        print("Starting " + self.threadName)
+        print(("Starting " + self.threadName))
         self.process_data()
         self.csvfile.flush()
         self.csvfile.close()
-        print("Ending  " + self.threadName)
+        print(("Ending  " + self.threadName))
 
     def process_data(self):
         # f = '{:10}{:10} {:10} {:20}'
@@ -83,5 +83,5 @@ class GroupEmailSaver (threading.Thread):
                 try:
                     self.writer.writerow(r)
                 except UnicodeEncodeError:
-                    print("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, r)
+                    print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, r))
 

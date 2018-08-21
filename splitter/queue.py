@@ -1,5 +1,4 @@
-
-import Queue
+import queue
 import requests
 import threading
 
@@ -9,7 +8,7 @@ class LockedQueue:
 
     def __init__(self):
         # Initialize a queue and a lock.
-        self.q = Queue.Queue()
+        self.q = queue.Queue()
         self.lock = threading.Lock()
 
     def get(self):

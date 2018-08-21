@@ -8,5 +8,5 @@ def Authenticate(cred, s):
     r = s.get(u, params=payload)
     j = r.json()
     if j['status'] == 'error' or j["message"] != "Successful Login":
-        print('Authentication failed: ', j)
+        print(('Authentication failed: ', j))
         exit(1)

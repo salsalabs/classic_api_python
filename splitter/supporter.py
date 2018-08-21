@@ -18,9 +18,9 @@ class SupporterReader (threading.Thread):
         self.threadName = "drive"
 
     def run(self):
-        print("Starting " + self.threadName)
+        print(("Starting " + self.threadName))
         self.process_data()
-        print("Ending  " + self.threadName)
+        print(("Ending  " + self.threadName))
 
     def process_data(self):
         # Read supporters from the database.  Queue them up individually
@@ -34,7 +34,7 @@ class SupporterReader (threading.Thread):
                        'condition': self.cond,
                        'include': 'supporter_KEY,First_Name,Last_Name,Email'}
             u = 'https://' + self.cred['host'] + '/api/getObjects.sjs'
-            print("%s_%02d: reading %d from %7d" % (self.threadName, self.threadID, count, offset))
+            print(("%s_%02d: reading %d from %7d" % (self.threadName, self.threadID, count, offset)))
             r = self.session.get(u, params=payload)
             j = r.json()
 
@@ -66,11 +66,11 @@ class SupporterSaver (threading.Thread):
         self.writer.writeheader()
 
     def run(self):
-        print("Starting " + self.threadName)
+        print(("Starting " + self.threadName))
         self.process_data()
         self.csvfile.flush()
         self.csvfile.close()
-        print("Ending  " + self.threadName)
+        print(("Ending  " + self.threadName))
 
     def process_data(self):
         # Accept a (group_name, email) record from the queue.  Write it
@@ -86,5 +86,5 @@ class SupporterSaver (threading.Thread):
             try:
                 self.writer.writerow(supporter)
             except UnicodeEncodeError:
-                    print("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, supporter)
+                    print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, supporter))
 
