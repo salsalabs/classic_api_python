@@ -73,9 +73,10 @@ class DonationReader (threading.Thread):
                                 if d[k] != "Recurring":
                                     d[k] = "OneTime"
                             if k == "Transaction_Date":
+                                x = str.split(d[k], " GMT")[0]
                                 f = "%a %b %d %Y %H:%M:%S"
-                                d = datetime.datetime.strptime(d[k], f)
-                                d[k] = d.strftime("%Y-%m-%d %H:%M:%S")
+                                x = datetime.datetime.strptime(x, f)
+                                d[k] = x.strftime("%Y-%m-%d %H:%M:%S")
                                 #to get YYYY-mm-dd use
                                 #d[k] = d.isoformat()
 
