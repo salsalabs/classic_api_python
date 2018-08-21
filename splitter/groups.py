@@ -39,29 +39,21 @@ class GroupsReader (threading.Thread):
                            'include': 'groups.Group_Name'}
                 u = 'https://' + self.cred['host'] + '/api/getLeftJoin.sjs'
                 r = self.session.get(u, params=payload)
-                print("Groups: read %s", r.text[0:100])
-                # Salsa returns "[{ }]" when there's no data.  That confuses the
-                # JSON parser...
-                m = re.match("\\{\\s+\\}", r.text)
-                if m:
-                    j = []
-                else:
-                    j = r.json()
+                j = r.json()
 
                 # Iterate through the groups and push them onto the (groups,email)_
                 # queue.
                 for group in j:
-                    r = [group.Group_Name, supporter.Email]
+                    r = [group["Group_Name"], supporter["Email"]]
                     self.out.put(r)
-                    print("%s: %s" % (self.threadName, r))
 
-            count = len(a)
-            offset += count
+                count = len(j)
+                offset += count
 
 
 class GroupEmailSaver (threading.Thread):
-        # Accepts (groupName, email) recvords from a queue and writes them to
-        # a CSV file.
+    # Accepts (groupName, email) recvords from a queue and writes them to
+    # a CSV file.
 
     def __init__(self, threadID, in1, exitFlag):
         threading.Thread.__init__(self)
@@ -90,11 +82,6 @@ class GroupEmailSaver (threading.Thread):
             if r:
                 # csv writer complains if there's stuff in the record
                 # that's not going to be written
-                del supporter['object']
-                del supporter['key']
-                # print(f.format(supporter["supporter_KEY"],
-                #     supporter["First_Name"],
-                #     supporter["Last_Name"],
-                #     supporter["Email"]
-                #     ))
+                del r['object']
+                del r['key']
                 self.writer.writerow(r)
