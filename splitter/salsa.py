@@ -7,8 +7,6 @@ def Authenticate(cred, s):
     u = 'https://' + cred['host'] + '/api/authenticate.sjs'
     r = s.get(u, params=payload)
     j = r.json()
-    if j['status'] == 'error':
+    if j['status'] == 'error' or j["message"] != "Successful Login":
         print('Authentication failed: ', j)
         exit(1)
-
-    print('Authentication: ', j)
