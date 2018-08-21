@@ -34,6 +34,7 @@ class SupporterReader (threading.Thread):
                        'condition': self.cond,
                        'include': 'supporter_KEY,First_Name,Last_Name,Email'}
             u = 'https://' + self.cred['host'] + '/api/getObjects.sjs'
+            print("%s_%02d: reading %d from %7d" % (self.threadName, self.threadID, count, offset))
             r = self.session.get(u, params=payload)
             j = r.json()
 
@@ -44,7 +45,7 @@ class SupporterReader (threading.Thread):
                 self.out2.put(supporter)
                 # print("%s: %s" % (self.threadName, supporter["supporter_KEY"]))
 
-            count = 0  # len(j)
+            count = len(j)
             offset += count
 
 
