@@ -16,7 +16,11 @@ class SupporterReader (threading.Thread):
         self.out2 = out2
         self.exitFlag = exitFlag
         self.threadName = "drive"
-
+        x = []
+        for k, v in SupporterMap.items():
+            if v :
+                x.append(v)
+        self.incl = ",".join(x)
     def run(self):
         print(("Starting " + self.threadName))
         self.process_data()
@@ -32,18 +36,16 @@ class SupporterReader (threading.Thread):
                        "limit": "%d,%d" % (offset, count),
                        'object': 'supporter',
                        'condition': self.cond,
-                       'include': 'supporter_KEY,First_Name,Last_Name,Email'}
+                       'include': self.incl}
             u = 'https://' + self.cred['host'] + '/api/getObjects.sjs'
             print(("%s_%02d: reading %d from %7d" % (self.threadName, self.threadID, count, offset)))
             r = self.session.get(u, params=payload)
             j = r.json()
 
-            # Iterate through the hashes and push them onto the supporter
-            # queue.
+            # Iterate through the records and push each onto the output queues.
             for supporter in j:
                 self.out1.put(supporter)
                 self.out2.put(supporter)
-                # print("%s: %s" % (self.threadName, supporter["supporter_KEY"]))
 
             count = len(j)
             offset += count
@@ -61,7 +63,10 @@ class SupporterSaver (threading.Thread):
 
         fn = "supporters_%02d.csv" % self.threadID
         self.csvfile = open(fn, "w")
-        fieldnames = str.split("supporter_KEY,First_Name,Last_Name,Email", ",")
+        fieldnames = []
+        for k, v in SupporterMap.items():
+            if v:
+                fieldnames.append(k)
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
         self.writer.writeheader()
 
@@ -83,8 +88,43 @@ class SupporterSaver (threading.Thread):
             # that's not going to be written
             del supporter['object']
             del supporter['key']
+            # Classic-to-Engage fixes.
+            if supporter['Receive_Email'] > '0':
+                supporter['Receive_Email'] = "Subscribed"
+            else:
+                supporter['Receive_Email'] = "Unsubscribed"
+
+            # Create a new dict of Engage headers and Classic values.
+            m = {}
+            for k, v in SupporterMap.items():
+                if v:
+                    m[k] = supporter[v]
             try:
-                self.writer.writerow(supporter)
+                self.writer.writerow(m)
             except UnicodeEncodeError:
                     print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, supporter))
 
+SupporterMap = {
+    "Address, Line 1": "Street",
+    "Address, Line 2": "Street_2",
+    "Cell Phone": "Cell_Phone",
+    "City": "City",
+    "Country": "Country", 
+    "Date of Birth": None,
+    "Email Address": "Email",
+    "Subscription Status": "Receive_Email",
+    "External ID": "supporter_KEY",
+    "Facebook ID": None,
+    "First Name": "First_Name",
+    "Last Name": "Last_Name",
+    "Gender": None,
+    "Home Phone": "Phone",
+    "Middle Name": "MI",
+    "Preferred Language": "Language_Code",
+    "State": "State",
+    "Suffix": "Suffix",
+    "Timezone": "Timezone",
+    "Title": "Title",
+    "Twitter ID": None,
+    "Work Phone": "Work_Phone",
+    "Zip Code": "Zip"}
