@@ -44,8 +44,11 @@ class GroupsReader (threading.Thread):
                 # Iterate through the groups and push them onto the (groups,email)_
                 # queue.
                 for group in j:
-                    r = { "Group": group["Group_Name"], "Email": supporter["Email"] }
-                    self.out.put(r)
+                    g = str.strip(group["Group_Name"])
+                    e = str.strip(supporter["Email"])
+                    if len(g) > 0 and len(e) > 0:
+                        r = { "Group": g, "Email": e }
+                        self.out.put(r)
 
                 count = len(j)
                 offset += count
@@ -79,7 +82,7 @@ class GroupEmailSaver (threading.Thread):
         # f = '{:10}{:10} {:10} {:20}'
         while not self.exitFlag:
             r = self.in1.get()
-            if r:
+            if r and r["Group"] and r["Email"]:
                 try:
                     self.writer.writerow(r)
                 except UnicodeEncodeError:
