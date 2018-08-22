@@ -77,9 +77,7 @@ class DonationReader (threading.Thread):
                                 d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
                                 #to get YYYY-mm-dd use
                                 #d[k] = x.isoformat()
-
                     self.out.put(d)
-                    print(("%s_%02d: %s" % (self.threadName, self.threadID, json.dumps(d))))
 
 
 class DonationSaver (threading.Thread):
@@ -119,6 +117,10 @@ class DonationSaver (threading.Thread):
             if not r:
                 continue
             try:
+
+                m = "%s_%02d: %s" % (self.threadName, self.threadID, json.dumps(r))
+                print(m)
+
                 self.writer.writerow(r)
             except UnicodeEncodeError:
                 print(("%s_%02d: UnicodeEncodeError on %s",
