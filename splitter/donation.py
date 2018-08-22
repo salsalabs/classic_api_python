@@ -122,6 +122,8 @@ class DonationSaver (threading.Thread):
                 print(("%s_%02d: UnicodeEncodeError on %s",
                        self.threadName, self.threadID, r))
 
+# 'None' is a marker to tell this class that the fields need to come from
+# the supporter record and not from the donation record.
 DonationMap = {
     "supporter_KEY": None,
     "Email": None,
