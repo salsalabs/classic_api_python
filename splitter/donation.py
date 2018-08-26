@@ -124,7 +124,7 @@ class DonationSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
-        count = self.max
+        count = self.maxRecs
         while not self.exitFlag:
             r = self.supQ.get()
             if not r:

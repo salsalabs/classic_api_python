@@ -112,3 +112,4 @@ class GroupEmailSaver (threading.Thread):
 GroupsMap = {
     "Group": "Group_Name",
     "Email": "Email"
+}
