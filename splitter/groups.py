@@ -66,14 +66,26 @@ class GroupEmailSaver (threading.Thread):
         self.in1 = in1
         self.outDir = outDir
         self.exitFlag = exitFlag
+        self.csvfile = None
+        self.maxRecs = 50000
+        self.fileNum = 1
 
-        fn = "groups_%02d.csv" % self.threadID
-        fn = os.path.join(outDir, fn)
+    def openFile(self):
+        #Open a new CSV output file.  The filename contains the thread ID and
+        #a current file serial number.
+        fn = "groups_%02d_%02d.csv" % (self.threadID, self.fileNum)
+        fn = os.path.join(self.outDir, fn)
         d = os.path.dirname(fn)
         if not os.path.exists(d):
             os.makedirs(d)
+        if self.csvfile != None:
+            self.csvfile.flush()
+            self.csvfile.close()
         self.csvfile = open(fn, "w")
-        fieldnames = str.split("Group,Email", ",")
+        fieldnames = []
+        for k, v in GroupsMap.items():
+            if v:
+                fieldnames.append(k)
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
         self.writer.writeheader()
 
@@ -85,11 +97,18 @@ class GroupEmailSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
+        count = self.maxRecs
         while not self.exitFlag:
             r = self.in1.get()
             if r and r["Group"] and r["Email"]:
                 try:
+                    if count >= self.maxRecs:
+                        count = 0
+                        self.openFile()
+                        self.fileNum = self.fileNum + 1
                     self.writer.writerow(r)
                 except UnicodeEncodeError:
                     print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, r))
-
+GroupsMap = {
+    "Group": "Group_Name",
+    "Email": "Email"

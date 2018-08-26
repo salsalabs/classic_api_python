@@ -66,12 +66,21 @@ class SupporterSaver (threading.Thread):
         self.inbound = inbound
         self.outDir = outDir
         self.exitFlag = exitFlag
+        self.csvfile = None
+        self.maxRecs = 50000
+        self.fileNum = 1
 
-        fn = "supporters_%02d.csv" % self.threadID
-        fn = os.path.join(outDir, fn)
+    def openFile(self):
+        #Open a new CSV output file.  The filename contains the thread ID and
+        #a current file serial number.
+        fn = "supporters_%02d_%02d.csv" % (self.threadID, self.fileNum)
+        fn = os.path.join(self.outDir, fn)
         d = os.path.dirname(fn)
         if not os.path.exists(d):
             os.makedirs(d)
+        if self.csvfile != None:
+            self.csvfile.flush()
+            self.csvfile.close()
         self.csvfile = open(fn, "w")
         fieldnames = []
         for k, v in SupporterMap.items():
@@ -88,12 +97,15 @@ class SupporterSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
-        # Accept a (group_name, email) record from the queue.  Write it
-        # as a record to a CSV file.
+        count = self.maxRecs
         while not self.exitFlag:
             supporter = self.inbound.get()
             if not supporter:
                 continue
+            if count >= self.maxRecs:
+                count = 0
+                self.openFile()
+                self.fileNum = self.fileNum + 1
             # csv writer complains if there's stuff in the record
             # that's not going to be written
             del supporter['object']

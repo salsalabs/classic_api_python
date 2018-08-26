@@ -7,6 +7,7 @@ import re
 import threading
 
 
+
 class DonationReader (threading.Thread):
     # Read supporters from a queue, find the groups that the supporter belongs
     # to, then write individual (group_Name, email) records to the output
@@ -20,6 +21,7 @@ class DonationReader (threading.Thread):
         self.supQ = supQ
         self.out = out
         self.exitFlag = exitFlag
+
         self.threadName = "DonationReader"
         x = []
         for k, v in DonationMap.items():
@@ -91,16 +93,26 @@ class DonationSaver (threading.Thread):
         self.supQ = supQ
         self.outDir = outDir
         self.exitFlag = exitFlag
+        self.csvfile = None
+        self.maxRecs = 50000
+        self.fileNum = 1
 
-        fn = "donations_%02d.csv" % self.threadID
-        fn = os.path.join(outDir, fn)
+    def openFile(self):
+        #Open a new CSV output file.  The filename contains the thread ID and
+        #a current file serial number.
+        fn = "supporters_%02d_%02d.csv" % (self.threadID, self.fileNum)
+        fn = os.path.join(self.outDir, fn)
         d = os.path.dirname(fn)
         if not os.path.exists(d):
             os.makedirs(d)
+        if self.csvfile != None:
+            self.csvfile.flush()
+            self.csvfile.close()
         self.csvfile = open(fn, "w")
         fieldnames = []
-        for k, v in DonationMap.items():
-            fieldnames.append(k)
+        for k, v in SupporterMap.items():
+            if v:
+                fieldnames.append(k)
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
         self.writer.writeheader()
 
@@ -112,11 +124,17 @@ class DonationSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
+        count = self.max
         while not self.exitFlag:
             r = self.supQ.get()
             if not r:
                 continue
             try:
+                if count >= self.maxRecs:
+                    count = 0
+                    self.openFile()
+                    self.fileNum = self.fileNum + 1
+                
                 self.writer.writerow(r)
             except UnicodeEncodeError:
                 print(("%s_%02d: UnicodeEncodeError on %s",
