@@ -108,8 +108,10 @@ class SupporterSaver (threading.Thread):
                 self.fileNum = self.fileNum + 1
             # csv writer complains if there's stuff in the record
             # that's not going to be written
-            del supporter['object']
-            del supporter['key']
+            if 'object' in supporter:
+                del supporter['object']
+            if 'key' in supporter:
+                del supporter['key']
             # Classic-to-Engage fixes.
             if supporter['Receive_Email'] > '0':
                 supporter['Receive_Email'] = "Subscribed"
