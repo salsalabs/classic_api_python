@@ -81,8 +81,6 @@ class DonationReader (threading.Thread):
                                 f = "%a %b %d %Y %H:%M:%S"
                                 x = datetime.datetime.strptime(x, f)
                                 d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
-                                #to get YYYY-mm-dd use
-                                #d[k] = x.isoformat()
                     self.out.put(d)
 
 
