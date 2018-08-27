@@ -18,7 +18,7 @@ class DonationReader (threading.Thread):
         self.threadID = threadID
         self.supQ = supQ
         self.out = out
-        self.subSaveQueue = supSaveQueue
+        self.supSaveQueue = supSaveQueue
         self.exitFlag = exitFlag
 
         self.threadName = "DonationReader"
@@ -58,7 +58,7 @@ class DonationReader (threading.Thread):
 
                 # If this supporter is no longer active, then send the supporter
                 # record to the supporter save queue.
-                if supporter.Receive_Email != None and int(supporter.Receive_Email) < 0:
+                if supporter['Receive_Email'] == "Unsubscribed":
                     self.supSaveQueue.put(supporter)
     
                 # Iterate through the donations, transmogrify as needed, then put them onto
@@ -147,8 +147,8 @@ class DonationSaver (threading.Thread):
 # 'None' is a marker to tell this class that the fields need to come from
 # the supporter record and not from the donation record.
 DonationMap = {
-    "supporter_KEY": None,
-    "Email": None,
+    "supporter_KEY": "supporter_KEY",
+    "Email": "Email",
     "donation_KEY": "donation_KEY",
     "Transaction_Date": "Transaction_Date",
     "Amount": "amount",
