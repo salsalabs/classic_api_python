@@ -88,7 +88,7 @@ def main():
     t.start()
     threads.append(t)
 
-    t = DonationReader(1, cred, session, donationQueue, donationSaveQueue, exitFlag)
+    t = DonationReader(1, cred, session, donationQueue, donationSaveQueue, supporterQueue, exitFlag)
     t.start()
     threads.append(t)
 
@@ -97,7 +97,7 @@ def main():
     t.start()
     threads.append(t)
 
-    cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&condition=Receive_Email>0'
+    cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%'
     t = SupporterReader(1, cred, session, cond,
                         supporterQueue, groupsQueue, donationQueue, exitFlag)
     t.start()

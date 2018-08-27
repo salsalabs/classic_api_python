@@ -11,13 +11,14 @@ import threading
 class DonationReader (threading.Thread):
     # Read supporters from a queue, find the donationsfor the supporters 
     # to, then write donation records records to the output queue.
-    def __init__(self, threadID, cred, session, supQ, out, exitFlag):
+    def __init__(self, threadID, cred, session, supQ, out, supSaveQueue, exitFlag):
         threading.Thread.__init__(self)
         self.cred = cred
         self.session = session
         self.threadID = threadID
         self.supQ = supQ
         self.out = out
+        self.subSaveQueue = supSaveQueue
         self.exitFlag = exitFlag
 
         self.threadName = "DonationReader"
@@ -55,6 +56,11 @@ class DonationReader (threading.Thread):
                 if count == 0:
                     continue
 
+                # If this supporter is no longer active, then send the supporter
+                # record to the supporter save queue.
+                if supporter.Receive_Email != None and int(supporter.Receive_Email) < 0:
+                    self.supSaveQueue.put(supporter)
+    
                 # Iterate through the donations, transmogrify as needed, then put them onto
                 # the donation saver queue.
                 for donation in j:
