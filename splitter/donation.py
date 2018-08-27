@@ -9,10 +9,8 @@ import threading
 
 
 class DonationReader (threading.Thread):
-    # Read supporters from a queue, find the groups that the supporter belongs
-    # to, then write individual (group_Name, email) records to the output
-    # queue
-
+    # Read supporters from a queue, find the donationsfor the supporters 
+    # to, then write donation records records to the output queue.
     def __init__(self, threadID, cred, session, supQ, out, exitFlag):
         threading.Thread.__init__(self)
         self.cred = cred
@@ -110,7 +108,7 @@ class DonationSaver (threading.Thread):
             self.csvfile.close()
         self.csvfile = open(fn, "w")
         fieldnames = []
-        for k, v in SupporterMap.items():
+        for k, v in DonationMap.items():
             if v:
                 fieldnames.append(k)
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
