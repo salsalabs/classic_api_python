@@ -12,7 +12,7 @@ class DonationReader (threading.Thread):
     """Read supporters from a queue, find the donationsfor the supporters 
     to, then write donation records records to the output queue."""
 
-    def __init__(self, threadID, cred, session, supQ, out, supSaveQ, exitFlag):
+    def __init__(self, threadID, cred, session, supQ, donSaveQ, supSaveQ, exitFlag):
         """
         Initialize a DonationReader instance.
         
@@ -22,7 +22,7 @@ class DonationReader (threading.Thread):
         :cred:     criteria to use to read the donation records.  Does not include supporter_KEY
         :session:  requests session to use to read from Salsa
         :supQ:     supporter queue.  Reads this to get supporters
-        :donQ:     donation request queue
+        :donSaveQ: donation request queue
         :supSaveQ: queue to receive inactive supporters with donation history
         :exitFlag: boolean that's true when processing should stop
         """
@@ -32,6 +32,7 @@ class DonationReader (threading.Thread):
         self.session = session
         self.threadID = threadID
         self.supQ = supQ
+        self.donSaveQ = donSaveQ
         self.supSaveQ = supSaveQ
         self.exitFlag = exitFlag
 
@@ -70,8 +71,8 @@ class DonationReader (threading.Thread):
                 if count == 0:
                     continue
 
-                # If this supporter is no longer active, then send the supporter
-                # record to the supporter save queue.
+                # Supporter had donations.  If this supporter is no longer active,
+                # then send the supporter record to the supporter save queue.
                 if supporter['Receive_Email'] == "Unsubscribed":
                     self.supSaveQ.put(supporter)
     
@@ -96,7 +97,7 @@ class DonationReader (threading.Thread):
                                 x = datetime.datetime.strptime(x, f)
                                 d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
                     print(d)
-                    self.donQ.put(d)
+                    self.donSaveQ.put(d)
 
 
 class DonationSaver (threading.Thread):
@@ -104,14 +105,14 @@ class DonationSaver (threading.Thread):
     Accepts donation records from a queue then writes to to a CSV file.
     """
 
-    def __init__(self, threadID, donQ, outDir, exitFlag):
+    def __init__(self, threadID, donSaveQ, outDir, exitFlag):
         """
         Initialize a DonationSaver instance
         
         Params:
         
         :threadID: numeric, cardinal thread identifier
-        :donQ:     donation queue, used to retrieve donations
+        :donSaveQ: donation save queue, used to retrieve donations
         :outDir:   directory where CSV file(s) are stored
         :exitFlag: boolean that's true when processing should stop
         """
@@ -119,7 +120,7 @@ class DonationSaver (threading.Thread):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "DonationSaver"
-        self.donQ = donQ
+        self.donSaveQ = donSaveQ
         self.outDir = outDir
         self.exitFlag = exitFlag
         self.csvfile = None
@@ -132,7 +133,7 @@ class DonationSaver (threading.Thread):
         file serial number.
         """
 
-        fn = "supporters_%02d_%02d.csv" % (self.threadID, self.fileNum)
+        fn = "donations_%02d_%02d.csv" % (self.threadID, self.fileNum)
         fn = os.path.join(self.outDir, fn)
         d = os.path.dirname(fn)
         if not os.path.exists(d):
@@ -170,10 +171,10 @@ class DonationSaver (threading.Thread):
 
         count = self.maxRecs
         while not self.exitFlag:
-            r = self.donQ.get()
-            print(r)
+            r = self.donSaveQ.get()
             if not r:
                 continue
+            print(r)
             try:
                 if count >= self.maxRecs:
                     count = 0
