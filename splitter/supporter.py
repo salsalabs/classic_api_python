@@ -48,9 +48,13 @@ class SupporterReader (threading.Thread):
 
             # Iterate through the records and push each onto the output queues.
             for supporter in j:
-                self.out1.put(supporter)
+                if supporter["Receive_Email"] != "Unsubscribed":
+                    self.out1.put(supporter)
+                    self.out3.put(supporter)
+                # Donations processor will write donation records for all supporters
+                # with emails.  Donations will queue up supporter records for 
+                # supporters with donation history.
                 self.out2.put(supporter)
-                self.out3.put(supporter)
 
             count = len(j)
             offset += count
