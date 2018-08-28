@@ -96,7 +96,6 @@ class DonationReader (threading.Thread):
                                 f = "%a %b %d %Y %H:%M:%S"
                                 x = datetime.datetime.strptime(x, f)
                                 d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
-                    print(d)
                     self.donSaveQ.put(d)
 
 
@@ -174,7 +173,6 @@ class DonationSaver (threading.Thread):
             r = self.donSaveQ.get()
             if not r:
                 continue
-            print(r)
             try:
                 if count >= self.maxRecs:
                     count = 0
@@ -182,6 +180,7 @@ class DonationSaver (threading.Thread):
                     self.fileNum = self.fileNum + 1
                 
                 self.writer.writerow(r)
+
             except UnicodeEncodeError:
                 print(("%s_%02d: UnicodeEncodeError on %s",
                        self.threadName, self.threadID, r))
