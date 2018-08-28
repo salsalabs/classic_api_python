@@ -53,7 +53,7 @@ def main():
     """
     
     exitFlag = False
-    supporterQueue = LockedQueue()
+    supporterSaveQueue = LockedQueue()
     groupsQueue = LockedQueue()
     groupsEmailQueue = LockedQueue()
     donationQueue = LockedQueue()
@@ -84,11 +84,11 @@ def main():
     t.start()
     threads.append(t)
 
-    t = SupporterSaver(1, supporterQueue, args.outputDir, exitFlag)
+    t = SupporterSaver(1, supporterSaveQueue, args.outputDir, exitFlag)
     t.start()
     threads.append(t)
 
-    t = DonationReader(1, cred, session, donationQueue, donationSaveQueue, supporterQueue, exitFlag)
+    t = DonationReader(1, cred, session, donationQueue, donationSaveQueue, supporterSaveQueue, exitFlag)
     t.start()
     threads.append(t)
 
@@ -99,7 +99,7 @@ def main():
 
     cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%'
     t = SupporterReader(1, cred, session, cond,
-                        supporterQueue, groupsQueue, donationQueue, exitFlag)
+                        supporterSaveQueue, groupsQueue, donationQueue, exitFlag)
     t.start()
     threads.append(t)
 
