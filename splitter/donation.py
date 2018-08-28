@@ -81,6 +81,7 @@ class DonationReader (threading.Thread):
                                 f = "%a %b %d %Y %H:%M:%S"
                                 x = datetime.datetime.strptime(x, f)
                                 d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
+                    print(d)
                     self.out.put(d)
 
 
@@ -88,11 +89,11 @@ class DonationSaver (threading.Thread):
     # Accepts (groupName, email) recvords from a queue and writes them to
     # a CSV file.
 
-    def __init__(self, threadID, supQ, outDir, exitFlag):
+    def __init__(self, threadID, donQ, outDir, exitFlag):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "DonationSaver"
-        self.supQ = supQ
+        self.donQ = donQ
         self.outDir = outDir
         self.exitFlag = exitFlag
         self.csvfile = None
@@ -128,7 +129,8 @@ class DonationSaver (threading.Thread):
     def process_data(self):
         count = self.maxRecs
         while not self.exitFlag:
-            r = self.supQ.get()
+            r = self.donQ.get()
+            print(r)
             if not r:
                 continue
             try:
