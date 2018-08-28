@@ -1,6 +1,7 @@
 import csv
 import os
 import os.path
+import pathlib
 import threading
 
 
@@ -105,6 +106,8 @@ class GroupEmailSaver (threading.Thread):
         self.csvfile = None
         self.maxRecs = 50000
         self.fileNum = 1
+        self.fileRoot = "groups"
+
 
     def openFile(self):
         """
@@ -112,8 +115,14 @@ class GroupEmailSaver (threading.Thread):
         a current file serial number.
         """
 
-        fn = "groups_%02d_%02d.csv" % (self.threadID, self.fileNum)
-        fn = os.path.join(self.outDir, fn)
+        while True:
+            fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
+            fn = os.path.join(self.outDir, fn)
+            self.fileNum = self.fileNum + 1
+            p = pathlib.Path(fn)
+            if not p.is_file():
+                break
+
         d = os.path.dirname(fn)
         if not os.path.exists(d):
             os.makedirs(d)

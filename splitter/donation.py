@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 import os.path
-import re
+import pathlib
 import threading
 
 
@@ -35,8 +35,8 @@ class DonationReader (threading.Thread):
         self.donSaveQ = donSaveQ
         self.supSaveQ = supSaveQ
         self.exitFlag = exitFlag
-
         self.threadName = "DonationReader"
+
         x = []
         for k, v in DonationMap.items():
             if v:
@@ -125,6 +125,7 @@ class DonationSaver (threading.Thread):
         self.csvfile = None
         self.maxRecs = 50000
         self.fileNum = 1
+        self.fileRoot = "donations"
 
     def openFile(self):
         """
@@ -132,8 +133,14 @@ class DonationSaver (threading.Thread):
         file serial number.
         """
 
-        fn = "donations_%02d_%02d.csv" % (self.threadID, self.fileNum)
-        fn = os.path.join(self.outDir, fn)
+        while True:
+            fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
+            fn = os.path.join(self.outDir, fn)
+            self.fileNum = self.fileNum + 1
+            p = pathlib.Path(fn)
+            if not p.is_file():
+                break
+
         d = os.path.dirname(fn)
         if not os.path.exists(d):
             os.makedirs(d)

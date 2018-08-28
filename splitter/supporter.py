@@ -2,6 +2,7 @@ import csv
 import threading
 import os
 import os.path
+import pathlib
 import threading
 
 
@@ -104,6 +105,7 @@ class SupporterSaver (threading.Thread):
         self.exitFlag = exitFlag
         self.csvfile = None
         self.maxRecs = 50000
+        self.fileRoot = "supporters"
         self.fileNum = 1
 
     def openFile(self):
@@ -112,8 +114,14 @@ class SupporterSaver (threading.Thread):
         and the current file serial number.
         """
 
-        fn = "supporters_%02d_%02d.csv" % (self.threadID, self.fileNum)
-        fn = os.path.join(self.outDir, fn)
+        while True:
+            fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
+            fn = os.path.join(self.outDir, fn)
+            self.fileNum = self.fileNum + 1
+            p = pathlib.Path(fn)
+            if not p.is_file():
+                break
+
         d = os.path.dirname(fn)
         if not os.path.exists(d):
             os.makedirs(d)
@@ -153,7 +161,6 @@ class SupporterSaver (threading.Thread):
             if count >= self.maxRecs:
                 count = 0
                 self.openFile()
-                self.fileNum = self.fileNum + 1
             # csv writer complains if there's stuff in the record
             # that's not going to be written
             if 'object' in supporter:
