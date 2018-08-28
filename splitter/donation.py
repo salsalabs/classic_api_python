@@ -11,11 +11,11 @@ class DonationReader (threading.Thread):
     """Read supporters from a queue, find the donationsfor the supporters 
     to, then write donation records records to the output queue."""
 
-    def __init__(self, threadID, cred, session, supQ, donSaveQ, supSaveQ, exitFlag):
+    def __init__(self, **kwargs):
         """
         Initialize a DonationReader instance.
         
-        Parameters:
+        Parameters in kwargs:
         
         :threadID: thread number, generally cardinal
         :cred:     login credentials (from the YAML file)
@@ -27,13 +27,7 @@ class DonationReader (threading.Thread):
         """
 
         threading.Thread.__init__(self)
-        self.cred = cred
-        self.session = session
-        self.threadID = threadID
-        self.supQ = supQ
-        self.donSaveQ = donSaveQ
-        self.supSaveQ = supSaveQ
-        self.exitFlag = exitFlag
+        self.__dict__.update(kwargs)
         self.threadName = "DonationReader"
 
         x = []
@@ -184,6 +178,7 @@ class DonationSaver (threading.Thread):
                     count = 0
                     self.openFile()
                 self.writer.writerow(r)
+                count = count + 1
 
             except UnicodeEncodeError:
                 print(("%s_%02d: UnicodeEncodeError on %s",

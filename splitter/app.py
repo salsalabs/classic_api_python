@@ -90,7 +90,16 @@ def main():
     t.start()
     threads.append(t)
 
-    t = DonationReader(1, cred, session, donationQueue, donationSaveQueue, supporterSaveQueue, exitFlag)
+    kwargs = {
+        "threadID": 1,
+        "cred":     cred,
+        "session":  session,
+        "supQ": donationQueue,
+        "donSaveQ": donationSaveQueue,
+        "supSaveQ": supporterSaveQueue,
+        "exitFlag": exitFlag
+    }
+    t = DonationReader(**kwargs)
     t.start()
     threads.append(t)
 
@@ -99,7 +108,7 @@ def main():
     t.start()
     threads.append(t)
 
-    args = {
+    kwargs = {
         "threadID": 1,
         "cred":     cred,
         "session":  session,
@@ -110,7 +119,7 @@ def main():
         "offset":   args.offset,
         "exitFlag": exitFlag
     }
-    t = SupporterReader(**args)
+    t = SupporterReader(**kwargs)
     t.start()
     threads.append(t)
 
