@@ -162,7 +162,6 @@ class GroupEmailSaver (threading.Thread):
                     if count >= self.maxRecs:
                         count = 0
                         self.openFile()
-                        self.fileNum = self.fileNum + 1
                     d = {}
                     for k, v in GroupsMap.items():
                         d[k] = r[v]

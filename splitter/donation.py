@@ -7,7 +7,6 @@ import pathlib
 import threading
 
 
-
 class DonationReader (threading.Thread):
     """Read supporters from a queue, find the donationsfor the supporters 
     to, then write donation records records to the output queue."""
@@ -184,8 +183,6 @@ class DonationSaver (threading.Thread):
                 if count >= self.maxRecs:
                     count = 0
                     self.openFile()
-                    self.fileNum = self.fileNum + 1
-                
                 self.writer.writerow(r)
 
             except UnicodeEncodeError:
