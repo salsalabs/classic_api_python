@@ -9,16 +9,30 @@ import threading
 
 
 class DonationReader (threading.Thread):
-    # Read supporters from a queue, find the donationsfor the supporters 
-    # to, then write donation records records to the output queue.
-    def __init__(self, threadID, cred, session, supQ, out, supSaveQueue, exitFlag):
+    """Read supporters from a queue, find the donationsfor the supporters 
+    to, then write donation records records to the output queue."""
+
+    def __init__(self, threadID, cred, session, supQ, out, supSaveQ, exitFlag):
+        """
+        Initialize a DonationReader instance.
+        
+        Parameters:
+        
+        :threadID: thread number, generally cardinal
+        :cred:     criteria to use to read the donation records.  Does not include supporter_KEY
+        :session:  requests session to use to read from Salsa
+        :supQ:     supporter queue.  Reads this to get supporters
+        :donQ:     donation request queue
+        :supSaveQ: queue to receive inactive supporters with donation history
+        :exitFlag: boolean that's true when processing should stop
+        """
+
         threading.Thread.__init__(self)
         self.cred = cred
         self.session = session
         self.threadID = threadID
         self.supQ = supQ
-        self.out = out
-        self.supSaveQueue = supSaveQueue
+        self.supSaveQ = supSaveQ
         self.exitFlag = exitFlag
 
         self.threadName = "DonationReader"
@@ -59,7 +73,7 @@ class DonationReader (threading.Thread):
                 # If this supporter is no longer active, then send the supporter
                 # record to the supporter save queue.
                 if supporter['Receive_Email'] == "Unsubscribed":
-                    self.supSaveQueue.put(supporter)
+                    self.supSaveQ.put(supporter)
     
                 # Iterate through the donations, transmogrify as needed, then put them onto
                 # the donation saver queue.
@@ -82,14 +96,26 @@ class DonationReader (threading.Thread):
                                 x = datetime.datetime.strptime(x, f)
                                 d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
                     print(d)
-                    self.out.put(d)
+                    self.donQ.put(d)
 
 
 class DonationSaver (threading.Thread):
-    # Accepts (groupName, email) recvords from a queue and writes them to
-    # a CSV file.
+    """
+    Accepts donation records from a queue then writes to to a CSV file.
+    """
 
     def __init__(self, threadID, donQ, outDir, exitFlag):
+        """
+        Initialize a DonationSaver instance
+        
+        Params:
+        
+        :threadID: numeric, cardinal thread identifier
+        :donQ:     donation queue, used to retrieve donations
+        :outDir:   directory where CSV file(s) are stored
+        :exitFlag: boolean that's true when processing should stop
+        """
+
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "DonationSaver"
@@ -101,8 +127,11 @@ class DonationSaver (threading.Thread):
         self.fileNum = 1
 
     def openFile(self):
-        #Open a new CSV output file.  The filename contains the thread ID and
-        #a current file serial number.
+        """
+        Open a CSV filename.  The filename contains the thread ID and the current
+        file serial number.
+        """
+
         fn = "supporters_%02d_%02d.csv" % (self.threadID, self.fileNum)
         fn = os.path.join(self.outDir, fn)
         d = os.path.dirname(fn)
@@ -120,6 +149,10 @@ class DonationSaver (threading.Thread):
         self.writer.writeheader()
 
     def run(self):
+        """
+        Run the thread.  overrides Thread.run().
+        """
+
         print(("Starting " + self.threadName))
         self.process_data()
         self.csvfile.flush()
@@ -127,6 +160,14 @@ class DonationSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
+        """
+        Read donations from the donation queue, format them, then write them to
+        the CSV file.
+        
+        Note that inactive supporter records that have donations are written
+        to the supporter save queue.
+        """
+
         count = self.maxRecs
         while not self.exitFlag:
             r = self.donQ.get()
@@ -144,12 +185,10 @@ class DonationSaver (threading.Thread):
                 print(("%s_%02d: UnicodeEncodeError on %s",
                        self.threadName, self.threadID, r))
 
-# 'None' is a marker to tell this class that the fields need to come from
-# the supporter record and not from the donation record.
 DonationMap = {
-    "supporter_KEY": "supporter_KEY",
-    "Email": "Email",
-    "donation_KEY": "donation_KEY",
+    "supporter_KEY":    "supporter_KEY",
+    "Email":            "Email",
+    "donation_KEY":     "donation_KEY",
     "Transaction_Date": "Transaction_Date",
-    "Amount": "amount",
+    "Amount":           "amount",
     "Transaction_Type": "Transaction_Type"}
