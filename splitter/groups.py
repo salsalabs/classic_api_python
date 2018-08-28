@@ -5,28 +5,51 @@ import threading
 
 
 class GroupsReader (threading.Thread):
-    # Read supporters from a queue, find the groups that the supporter belongs
-    # to, then write individual (group_Name, email) records to the output
-    # queue
+    """
+    Read supporters from a queue, find the groups that the supporter belongs
+    to, then write individual (group_Name, email) records to the groupSaveQput queue.
+    """
 
-    def __init__(self, threadID, cred, session, in1, out, exitFlag):
+    def __init__(self, threadID, cred, session, supQ, groupSaveQ, exitFlag):
+        """
+        Initialize a GroupsReader instance.
+
+        Params:
+
+        :threadID:   numeric, cardinal thread identifier
+        :cred:       Salsa read criteria.  Does not include supporter_KEY.
+        :session:    requests session used to read from Salsa
+        :supQ:       queue to read to retrieve supporters
+        :groupSaveQ: queue to write to read and save groups
+        :exitFlag:   boolean flag to indicate that processing has completed
+        """
+
         threading.Thread.__init__(self)
         self.cred = cred
         self.session = session
         self.threadID = threadID
-        self.in1 = in1
-        self.out = out
+        self.supQ = supQ
+        self.groupSaveQ = groupSaveQ
         self.exitFlag = exitFlag
         self.threadName = "GroupsReader"
 
     def run(self):
+        """
+        Run the thread.  Overrides Threading.run()
+        """
+
         print(("Starting " + self.threadName))
         self.process_data()
         print(("Ending   " + self.threadName))
 
     def process_data(self):
+        """
+        Read supporters and retrieve groups.  Push relevant group information
+        onto the group save queue.
+        """
+
         while not self.exitFlag:
-            supporter = self.in1.get()
+            supporter = self.supQ.get()
             if not supporter:
                 continue
             offset = 0
@@ -49,21 +72,34 @@ class GroupsReader (threading.Thread):
                     e = str.strip(supporter["Email"])
                     if len(g) > 0 and len(e) > 0:
                         r = { "Group": g, "Email": e }
-                        self.out.put(r)
+                        self.groupSaveQ.put(r)
 
                 count = len(j)
                 offset += count
 
 
 class GroupEmailSaver (threading.Thread):
-    # Accepts (groupName, email) recvords from a queue and writes them to
-    # a CSV file.
+    """
+    Accepts (groupName, email) records from a queue and writes them to
+    to CSV file(s).
+    """
 
-    def __init__(self, threadID, in1, outDir, exitFlag):
+    def __init__(self, threadID, groupSaveQ, outDir, exitFlag):
+        """
+        Initialize a GroupEmailSaver.
+
+        Params:
+
+        :threadID:  numeric cardinal thread identifier
+        :groupSaveQ: queue to read (groupName, email) records
+        :outDir: where the CSV file(s) wil end up
+        :extFiag: boolean indicating the end of processing
+        """
+
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "GroupEmailSaver"
-        self.in1 = in1
+        self.groupSaveQ = groupSaveQ
         self.outDir = outDir
         self.exitFlag = exitFlag
         self.csvfile = None
@@ -71,8 +107,11 @@ class GroupEmailSaver (threading.Thread):
         self.fileNum = 1
 
     def openFile(self):
-        #Open a new CSV output file.  The filename contains the thread ID and
-        #a current file serial number.
+        """
+        Open a new CSV file.  The filename contains the thread ID and
+        a current file serial number.
+        """
+
         fn = "groups_%02d_%02d.csv" % (self.threadID, self.fileNum)
         fn = os.path.join(self.outDir, fn)
         d = os.path.dirname(fn)
@@ -90,6 +129,10 @@ class GroupEmailSaver (threading.Thread):
         self.writer.writeheader()
 
     def run(self):
+        """
+        Run the thread.  Overrides Threading.run()
+        """
+
         print(("Starting " + self.threadName))
         self.process_data()
         self.csvfile.flush()
@@ -97,19 +140,29 @@ class GroupEmailSaver (threading.Thread):
         print(("Ending  " + self.threadName))
 
     def process_data(self):
+        """
+        Read (groupName, email) records from a queue and save them to one or
+        more CSV file(s).
+        """
+
         count = self.maxRecs
         while not self.exitFlag:
-            r = self.in1.get()
+            r = self.groupSaveQ.get()
             if r and r["Group"] and r["Email"]:
                 try:
                     if count >= self.maxRecs:
                         count = 0
                         self.openFile()
                         self.fileNum = self.fileNum + 1
-                    self.writer.writerow(r)
+                    d = {}
+                    for k, v in GroupsMap.items():
+                        d[k] = r[v]
+
+                    self.writer.writerow(d)
                 except UnicodeEncodeError:
                     print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, r))
+
 GroupsMap = {
-    "Group": "Group_Name",
+    "Group": "Group",
     "Email": "Email"
 }
