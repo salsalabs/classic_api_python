@@ -34,10 +34,10 @@ def main():
       donation CSV file.
 
     The application starts from the command line.  The user provides a file
-    containing Salsa campaign manager credentials.  The user may also set
-    the directory where CSV files will be written.
+    containing Salsa campaign manager credentials in a YAML file. The user may
+    also set the directory where CSV files will be written.
     
-     python3 splitter/app.py --help
+    python3 splitter/app.py --help
     usage: app.py [-h] [--login LOGINFILE] [--dir OUTPUTDIR]
     
     Export supporters, groups and donations for export to Engage.
@@ -46,6 +46,7 @@ def main():
       -h, --help         show this help message and exit
       --login LOGINFILE  YAML file with login credentials
       --dir OUTPUTDIR    Store export files here
+      --start OFFSET     
  
     Note:
     
@@ -66,7 +67,8 @@ def main():
                         help='YAML file with login credentials')
     parser.add_argument('--dir', dest='outputDir', action='store', default='./data',
                         help='Store export files here')
-
+    parser.add_argument('--offset', dest='offset', action='store', type=int, default=0,
+                        help='Start extraction at this offset')
 
     args = parser.parse_args()
     # Session to use for network I/O with automatic cookies.
@@ -97,9 +99,18 @@ def main():
     t.start()
     threads.append(t)
 
-    cond = 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%'
-    t = SupporterReader(1, cred, session, cond,
-                        supporterSaveQueue, groupsQueue, donationQueue, exitFlag)
+    args = {
+        "threadID": 1,
+        "cred":     cred,
+        "session":  session,
+        "cond":     'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%',
+        "supSaveQ": supporterSaveQueue,
+        "groupQ":   groupsQueue,
+        "donQ":     donationQueue,
+        "offset":   args.offset,
+        "exitFlag": exitFlag
+    }
+    t = SupporterReader(**args)
     t.start()
     threads.append(t)
 

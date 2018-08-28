@@ -19,7 +19,7 @@ class DonationReader (threading.Thread):
         Parameters:
         
         :threadID: thread number, generally cardinal
-        :cred:     criteria to use to read the donation records.  Does not include supporter_KEY
+        :cred:     login credentials (from the YAML file)
         :session:  requests session to use to read from Salsa
         :supQ:     supporter queue.  Reads this to get supporters
         :donSaveQ: donation request queue

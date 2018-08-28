@@ -17,7 +17,7 @@ class GroupsReader (threading.Thread):
         Params:
 
         :threadID:   numeric, cardinal thread identifier
-        :cred:       Salsa read criteria.  Does not include supporter_KEY.
+        :cred:       login credentials (from the YAML file)
         :session:    requests session used to read from Salsa
         :supQ:       queue to read to retrieve supporters
         :groupSaveQ: queue to write to read and save groups

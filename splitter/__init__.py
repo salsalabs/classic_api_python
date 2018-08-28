@@ -20,6 +20,7 @@ optional arguments:
   -h, --help         show this help message and exit
   --login LOGINFILE  YAML file with login credentials
   --dir OUTPUTDIR    Store export files here
+  --start START      Start extraction at this offset
 
  - LOGINFILE is a YAML formatted file that holds the credentials necessary
    to use the Salsa Classic API.  Here's an example.
@@ -30,6 +31,7 @@ password: Extra-super-secret-password
 
 -OUTPUTDIR will be created if it does not already exist.
 
+--STARt is the number of records to skip before reading from Salsa.
 Note:
 
 This is a Python version 3 app.  It will *not* run using Python version 2.
