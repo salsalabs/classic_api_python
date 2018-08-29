@@ -94,7 +94,7 @@ def main():
         "threadID": 1,
         "cred":     cred,
         "session":  session,
-        "supQ": donationQueue,
+        "supQ":     donationQueue,
         "donSaveQ": donationSaveQueue,
         "supSaveQ": supporterSaveQueue,
         "exitFlag": exitFlag
