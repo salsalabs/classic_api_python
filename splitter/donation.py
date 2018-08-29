@@ -147,6 +147,7 @@ class DonationSaver (threading.Thread):
                 fieldnames.append(k)
         self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
         self.writer.writeheader()
+        self.csvfile.flush()
 
     def run(self):
         """
@@ -177,7 +178,9 @@ class DonationSaver (threading.Thread):
                 if count >= self.maxRecs:
                     count = 0
                     self.openFile()
+                print(r)
                 self.writer.writerow(r)
+                self.csvfile.flush()
                 count = count + 1
 
             except UnicodeEncodeError:
