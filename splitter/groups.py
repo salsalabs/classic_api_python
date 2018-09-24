@@ -167,6 +167,8 @@ class GroupEmailSaver (threading.Thread):
                         d[k] = r[v]
 
                     self.writer.writerow(d)
+                    count = count + 1
+
                 except UnicodeEncodeError:
                     print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, r))
 

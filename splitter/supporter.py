@@ -16,7 +16,7 @@ class SupporterReader (threading.Thread):
         """
         Initialize a SupporterReader object
         
-        Params:
+        Params in kwargs:
         
         :threadID: numeric cardinal thread identifier
         :cred:     login credentials (from the YAML file)
@@ -180,6 +180,7 @@ class SupporterSaver (threading.Thread):
                     m[k] = str.strip(supporter[v])
             try:
                 self.writer.writerow(m)
+                count = count + 1
             except UnicodeEncodeError:
                     print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, supporter))
 
