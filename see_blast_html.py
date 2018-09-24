@@ -47,7 +47,6 @@ r = s.get(u, params=payload)
 j = r.json()
 
 # Write retrieved HTML to "blast_[[key]].thml"
-# Save this blast content to the database.
 fn = "blast_%s.html" % (args.email_blast_key)
 f = open(fn, 'w')
 content = j["HTML_Content"]
