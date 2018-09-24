@@ -3,6 +3,7 @@ import argparse
 import requests
 import yaml
 import json
+import hashlib
 
 # Get the login credentials
 parser = argparse.ArgumentParser(description='Write, view and delete an email_blast')
@@ -77,6 +78,14 @@ j = r.json()
 # Save this blast content to the database.
 fn = "confirmation_%s.html" % (key)
 f = open(fn, 'w')
-content = f.write(j["HTML_Content"])
+conf_content = j["HTML_Content"]
+f.write(conf_content)
 f.close()
 print("HTML confirmmation can be found in %s" % fn)
+
+before_hash = hashlib.sha256()
+before_hash.update(content)
+confirm_hash = hashlib.sha256()
+confirm_hash.update(conf_content)
+print("SHA256 hash in:  %s" % before_hash.hexdigest())
+print("SHA256 hash out: %s" % confirm_hash.hexdigest())
