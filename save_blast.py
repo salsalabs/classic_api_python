@@ -61,7 +61,7 @@ u = 'https://' + cred['host'] +'/save'
 r = s.post(u, data=payload)
 j = r.json()
 key = j[0]['key']
-print('Saved with key: ', key)
+print('Saved with key: %s' % key)
 
 # Read to confirm the modification.  The `getObject.sjs` call returns a single
 # record as a dictionary.
