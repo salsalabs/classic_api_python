@@ -33,7 +33,7 @@ if j['status'] == 'error':
     print('Authentication failed: ', j)
     exit(1)
 
-print('Authentication: ', j)
+# print('Authentication: ', j)
 
 # Save this blast content to the database.
 f = open(args.htmlFile, 'r')

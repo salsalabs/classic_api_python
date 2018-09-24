@@ -33,10 +33,9 @@ if j['status'] == 'error':
     print('Authentication failed: ', j)
     exit(1)
 
-print('Authentication: ', j)
+# print('Authentication: ', j)
 
-
-# Read to blast's key.  The `getObject.sjs` call returns a single
+# Read for blast's key.  The `getObject.sjs` call returns a single
 # record as a dictionary.
 payload = {
     'json': True,
@@ -46,7 +45,7 @@ u = 'https://' + cred['host'] +'/api/getObject.sjs'
 r = s.get(u, params=payload)
 j = r.json()
 
-# Write retrieved HTML to "confirmation_[[key]].thml"
+# Write retrieved HTML to "blast_[[key]].thml"
 # Save this blast content to the database.
 fn = "blast_%s.html" % (args.email_blast_key)
 f = open(fn, 'w')
