@@ -1,6 +1,8 @@
-    # App to read read "tags" for supporters that have an "email_blast" tag and
-# chapter_KEY of zero.  Use the "table_KEY" value to see if there is a matching
-# unsubscribe record.  Write some output.  Records marked "interesting" appeara
+# App to read read the "tags" tables for supporters that have an "email_blast" tag
+# and a chapter_KEY of zero.  Use the "table_KEY" value to see if there is a matching
+# unsubscribe record.
+#
+# Write some output as a CSV file. Records marked "interesting" appeara
 # to be unsubscribed before the email blast tag was applied.
 
 import argparse
