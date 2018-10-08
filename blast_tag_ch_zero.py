@@ -34,9 +34,8 @@ def parse_date(x):
     return datetime.datetime.strptime(x, f)
 
 def handle(j, csvFN, writer):
-    # Process the contents of the JSON object.  Creates
-    # a CSV writer as needed.  Writes contents to file
-    # "csvFN".  Returns the writer.
+    # Process the contents of the JSON object.  Creates a CSV writer
+    # with filename `csvFN`. Returns the writer.
 
     print("Found ", len(j), ' records.')
     # Iterate through the hashes and display essential parts of the record.
@@ -123,7 +122,6 @@ def main():
         ('include', ','.join(includes)),
         ('count', 500),
         ('offset', 0) ])
-    #print(payload)
 
     # But... passing MultiDict to requests doesn't seem to work.
     # We'll fake it by creating a really long URL because HTTP GET.
