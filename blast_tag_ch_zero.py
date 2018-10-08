@@ -34,28 +34,31 @@ def handle(j, csvFN, writer):
     print("Found ", len(j), ' records.')
     # Iterate through the hashes and display essential parts of the record.
     f = '{:10}:{:10} {:10} {:20} {:20} {:20} {:5}'
-    for tag in j:
-        tag["interesting"] = False
+    for r in j:
         if writer == None:
-            heads = 'prefix,tag,table_KEY,Last_Modified,Unsubscribe_Date,interesting'.split(",")
-            csvFile = open(args.csvFN, 'w')
+            heads = 'tag_data_KEY,prefix,tag,table_KEY,Last_Modified,Unsubscribe_Date,interesting'.split(",")
+            csvFile = open(csvFN, 'w')
+
+            # DictWriter requires the headers but doesn't write them.
+            # We'll do that first...
+            w = csv.writer(csvFile)
+            w.writerow(heads)
+
             writer = csv.DictWriter(csvFile, heads)
 
         # If the unsub time is less than the tag's last modified, then
         # that suggests that the chapter_KEY of zero is legitimate.
 
-        format='%c GMT%z'
-        t1 = parse_date(tag["Unsubscribe_Date"])
-        t2 = parse_date(tag["Last_Modified"])
-        tag["interesting"] = t1 < t2
+        t1 = parse_date(r["Unsubscribe_Date"])
+        t2 = parse_date(r["Last_Modified"])
+        r["interesting"] = t1 < t2
 
-        print(f.format(tag["prefix"],
-        tag["tag"],
-        tag["table_KEY"],
-        tag["Last_Modified"],
-        tag["Unsubscribe_Date"],
-        tag["interesting"]))
-        writer.writerow(tag)
+        # CSV writer is touchy about keys in the dict that are
+        # not in the headers. In this case, it's the primary key
+        # for the first table in the join.
+        del(r['unsubscribe_KEY'])
+
+        writer.writerow(r)
 
     return writer
 
@@ -97,6 +100,7 @@ def main():
         "tag_data.chapter_KEY=0",
     ]
     includes = [
+        "tag_data.tag_data_KEY",
         "tag.prefix",
         "tag.tag",
         "tag_data.table_KEY",
@@ -113,19 +117,17 @@ def main():
         ('condition', 'tag.prefix=email_blast'),
         ('condition',  'tag_data.database_table_KEY=142'),
         ('condition', 'tag_data.chapter_KEY=0'),
-        ('include', ','.join(includes),
+        ('include', ','.join(includes)),
         ('count', 500),
-        ('offset', 0)
-    ])
+        ('offset', 0) ])
     #print(payload)
 
     # But... passing MultiDict to requests doesn't seem to work.
     # We'll fake it by creating a really long URL because HTTP GET.
 
     while payload['count'] > 0:
-        f = 'Reading {} from offset {}\n'
+        f = 'Reading {} from offset {}'
         print(f.format(payload['count'], payload['offset']))
-        print()
         u = build_url(cred, payload)
         r = s.get(u)
 
@@ -138,8 +140,9 @@ def main():
 
         # This automatcally converts the JSON buffer to an array of dictionaries.
         j = r.json()
-        if len(j) > 0
-            writer = handle(j, csvFN, writer)
+        # Interate through the dictionaries.
+        if len(j) > 0:
+            writer = handle(j, args.csvFN, writer)
         payload['count'] = len(j)
         payload['offset'] = payload['offset'] + payload['count']
     print("Done")
