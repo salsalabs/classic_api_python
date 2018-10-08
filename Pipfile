@@ -10,5 +10,6 @@ name = "pypi"
 requests = "*"
 json = "*"
 pyyaml = "*"
+multidict = "*"
 
 [dev-packages]
