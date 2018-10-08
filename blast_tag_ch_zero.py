@@ -1,3 +1,8 @@
+    # App to read read "tags" for supporters that have an "email_blast" tag and
+# chapter_KEY of zero.  Use the "table_KEY" value to see if there is a matching
+# unsubscribe record.  Write some output.  Records marked "interesting" appeara
+# to be unsubscribed before the email blast tag was applied.
+
 import argparse
 import csv 
 import datetime
@@ -63,10 +68,6 @@ def handle(j, csvFN, writer):
     return writer
 
 def main():
-    # App to read read "tags" for supporters that have an "email_blast" tag and
-    # chapter_KEY of zero.  Use the "table_KEY" value to see if there is a matching
-    # unsubscribe record.  Write some output.  We'll see if the output indicates
-    # a pattern.
 
     # Get the login credentials
     parser = argparse.ArgumentParser(description='Read supporters')
