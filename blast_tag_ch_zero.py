@@ -9,9 +9,17 @@ import argparse
 import csv 
 import datetime
 import json
-import multidict
 import requests
 import yaml
+
+def exit_http_error(r):
+    # Check for an HTTP error.  Die noisily if one is found.
+    if r.status_code != 200:
+        print("\nRead error")
+        print("Status code:", r.status_code)
+        print("Body:", r.text)
+        print()
+        exit(0)
 
 def parse_date(x):
     # Parse Salsa Classic dates into a datetime.
@@ -22,12 +30,10 @@ def parse_date(x):
     return datetime.datetime.strptime(x, f)
 
 def handle(j, csvFN, writer):
-    # Process the contents of the JSON object.  Creates a CSV writer
-    # with filename `csvFN`. Returns the writer.
+    # Process the contents of the JSON object.  It's a list of hashes
+    # when it gets here.  Create a CSV writer with filename `csvFN`.
+    # Returns the writer.
 
-    print("Found ", len(j), ' records.')
-    # Iterate through the hashes and display essential parts of the record.
-    f = '{:10}:{:10} {:10} {:20} {:20} {:20} {:5}'
     for r in j:
         if writer == None:
             heads = 'tag_data_KEY,prefix,tag,table_KEY,Last_Modified,Unsubscribe_Date,interesting'.split(",")
@@ -37,7 +43,6 @@ def handle(j, csvFN, writer):
             # We'll do that first...
             w = csv.writer(csvFile)
             w.writerow(heads)
-
             writer = csv.DictWriter(csvFile, heads)
 
         # If the unsub time is less than the tag's last modified, then
@@ -57,7 +62,6 @@ def handle(j, csvFN, writer):
         del(r['unsubscribe_KEY'])
 
         writer.writerow(r)
-
     return writer
 
 def main():
@@ -73,15 +77,16 @@ def main():
     cred = yaml.load(open(args.loginFile))
     writer = None
     csvFile = None
+    s = requests.Session()
 
     # Authenticate
     payload = {
         'email': cred['email'],
         'password': cred['password'],
         'json': True }
-    s = requests.Session()
     u = 'https://' + cred['host'] + '/api/authenticate.sjs'
     r = s.get(u, params=payload)
+    exit_http_error(r)
     j = r.json()
     if j['status'] == 'error':
         print('Authentication failed: ', j)
@@ -89,12 +94,15 @@ def main():
 
     print('Authentication: ', j['status'])
 
+    #These are the conditions used to query Salsa's database.
     conditions = [
         "tag.prefix=email_blast",
         "tag_data.database_table_KEY=142",
-        "tag_data.chapter_KEY=0"
+        "tag_data.chapter_KEY=0",
+        "tag_data.Last_Modified LIKE 2018%"
     ]
 
+    #These are the fields that we'll use.
     includes = [
         "tag_data.tag_data_KEY",
         "tag.prefix",
@@ -104,9 +112,11 @@ def main():
         "Unsubscribe_Date"
     ]
 
-    # We're using MultiDict because it is is more expressive
-    # than a list of things. Also easier to relate back to 
-    # the API doc.
+    # This is the API call.
+    u = 'https://' + cred['host'] + '/api/getLeftJoin.sjs'
+
+    # The payload allows 'condition' to be a list.  That expands
+    # into a series of "&condition=" queries in the URL.  Neat.
     payload = {
         'json': True,
         'object': 'unsubscribe(supporter_KEY=tag_data.table_KEY)tag_data(tag_KEY)tag',
@@ -116,25 +126,17 @@ def main():
         'offset': args.offset
          }
 
-    # But... passing MultiDict to requests doesn't seem to work.
-    # We'll fake it by creating a really long URL because HTTP GET.
-
+    # Do until end of data.  Read a bunch of data and write it to
+    # the CSV file.
     while payload['count'] > 0:
         f = 'Reading {} from offset {}'
         print(f.format(payload['count'], payload['offset']))
-        u = build_url(cred, payload)
 
         r = s.get(u, params=payload)
-        if r.status_code != 200:
-            print("\nRead error")
-            print("Status code:", j.status_code)
-            print("Body:", j.text)
-            print()
-            exit(0)
+        exit_http_error(r)
 
         # This automatcally converts the JSON buffer to an array of dictionaries.
         j = r.json()
-        # Interate through the dictionaries.
         if len(j) > 0:
             writer = handle(j, args.csvFN, writer)
         payload['count'] = len(j)
