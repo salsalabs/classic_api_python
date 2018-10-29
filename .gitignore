@@ -110,4 +110,4 @@ logins
 # Output files
 *.csv
 *.txt
-
+*.html
