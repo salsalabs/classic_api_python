@@ -21,12 +21,12 @@ def main():
     
     * supporter listener -- accepts a supporter and writes to the supporter
       CSV file.
-    groups listener - accepts a supporter and passes on (group_name, email)
+    * groups listener - accepts a supporter and passes on (group_name, email)
       records to the second-tier groups-email listener
     * donation listener -- accepts a supporter and passes donation record to the
       second-tier donation-saver listener
       
-    The second-tier listeners write to CSV files.ArithmeticError
+    The second-tier listeners write to CSV files.
     
     * groups-email listener -- accepts a (group_name, email) record and writes it 
       to the groups CSV file
@@ -46,7 +46,7 @@ def main():
       -h, --help         show this help message and exit
       --login LOGINFILE  YAML file with login credentials
       --dir OUTPUTDIR    Store export files here
-      --start OFFSET     
+      --start OFFSET     Start extraction at this offset
  
     Note:
     

@@ -8,8 +8,8 @@ import threading
 
 
 class DonationReader (threading.Thread):
-    """Read supporters from a queue, find the donationsfor the supporters 
-    to, then write donation records records to the output queue."""
+    """Read supporters from a queue, find the donations for the supporters, 
+    then write donation records records to the output queue."""
 
     def __init__(self, **kwargs):
         """
@@ -37,11 +37,21 @@ class DonationReader (threading.Thread):
         self.incl = ",".join(x)
 
     def run(self):
+        """
+        Run the thread.  overrides Thread.run().
+        """
+
         print(("Starting " + self.threadName))
         self.process_data()
         print(("Ending   " + self.threadName))
 
     def process_data(self):
+        """
+        Read supporters from the supporter queue.  Retrieve donation records
+        for the supporters.  If a supporter is not active, then write the record
+        to the downstream supporter saver. 
+        """
+
         while not self.exitFlag:
             supporter = self.supQ.get()
             if not supporter:
@@ -94,7 +104,7 @@ class DonationReader (threading.Thread):
 
 class DonationSaver (threading.Thread):
     """
-    Accepts donation records from a queue then writes to to a CSV file.
+    Accepts donation records from a queue, then writes to to a CSV file.
     """
 
     def __init__(self, threadID, donSaveQ, outDir, exitFlag):
