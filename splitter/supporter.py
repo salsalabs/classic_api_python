@@ -175,7 +175,8 @@ class SupporterSaver (threading.Thread):
 
             # Create a new dict of Engage headers and Classic values.
             m = {}
-            for k, v in SupporterMap.items():
+            for k in SupportMapOrder:
+                v = SupporterMap[k]
                 if v:
                     m[k] = str.strip(supporter[v])
             try:
@@ -185,26 +186,52 @@ class SupporterSaver (threading.Thread):
                     print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, supporter))
 
 SupporterMap = {
-    "Address, Line 1": "Street",
-    "Address, Line 2": "Street_2",
-    "Cell Phone": "Cell_Phone",
+    "AddressLine1": "Street",
+    "AddressLine2": "Street_2",
+    "CellPhone": "Cell_Phone",
     "City": "City",
     "Country": "Country", 
-    "Date of Birth": None,
-    "Email Address": "Email",
-    "Subscription Status": "Receive_Email",
-    "External ID": "supporter_KEY",
-    "Facebook ID": None,
-    "First Name": "First_Name",
-    "Last Name": "Last_Name",
+    "DateOfBirth": None,
+    "Email": "Email",
+    "SubscriptionStatus": "Receive_Email",
+    "ExternalID": "supporter_KEY",
+    "FacebookID": None,
+    "FirstName": "First_Name",
+    "LastName": "Last_Name",
     "Gender": None,
-    "Home Phone": "Phone",
-    "Middle Name": "MI",
-    "Preferred Language": "Language_Code",
+    "HomePhone": "Phone",
+    "MiddleName": "MI",
+    "PostalCode": "Zip",
+    "PreferredLanguage": "Language_Code",
     "State": "State",
     "Suffix": "Suffix",
     "Timezone": "Timezone",
     "Title": "Title",
-    "Twitter ID": None,
-    "Work Phone": "Work_Phone",
-    "Zip Code": "Zip"}
+    "TwitterID": None,
+    "WorkPhone": "Work_Phone"}
+
+SupportMapOrder = [
+    "ExternalID",
+    "Email",
+    "Title",
+    "FirstName",
+    "MiddleName",
+    "LastName",
+    "Suffix",
+    "AddressLine1",
+    "AddressLine2",
+    "City",
+    "State",
+    "Country", 
+    "PostalCode",
+    "CellPhone",
+    "WorkPhone",
+    "SubscriptionStatus",
+    "DateOfBirth",
+    "FacebookID",
+    "Gender",
+    "HomePhone",
+    "PreferredLanguage",
+    "Timezone",
+    "TwitterID"
+]

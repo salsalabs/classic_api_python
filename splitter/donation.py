@@ -188,7 +188,7 @@ class DonationSaver (threading.Thread):
                 if count >= self.maxRecs:
                     count = 0
                     self.openFile()
-                print(r)
+                # print(r)
                 self.writer.writerow(r)
                 self.csvfile.flush()
                 count = count + 1

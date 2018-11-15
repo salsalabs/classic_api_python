@@ -112,7 +112,7 @@ def main():
         "threadID": 1,
         "cred":     cred,
         "session":  session,
-        "cond":     'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%',
+        "cond":     'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&Receive_Email>0',
         "supSaveQ": supporterSaveQueue,
         "groupQ":   groupsQueue,
         "donQ":     donationQueue,

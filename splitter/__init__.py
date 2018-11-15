@@ -29,9 +29,10 @@ host: salsa4.salsalabs.com
 email: campaign-manager@whatever.com
 password: Extra-super-secret-password
 
--OUTPUTDIR will be created if it does not already exist.
+ - OUTPUTDIR will be created if it does not already exist.
 
---STARt is the number of records to skip before reading from Salsa.
+ - START is the number of records to skip before reading from Salsa.
+ 
 Note:
 
 This is a Python version 3 app.  It will *not* run using Python version 2.
