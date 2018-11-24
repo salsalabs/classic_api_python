@@ -11,11 +11,13 @@ class GroupsReader (threading.Thread):
     to, then write individual (group_Name, email) records to the groupSaveQput queue.
     """
 
-    def __init__(self, threadID, cred, session, supQ, groupSaveQ, exitFlag):
-        """
-        Initialize a GroupsReader instance.
+    def __init__(self, **kwargs):
 
-        Params:
+
+        """
+        Initialize a DonationReader instance.
+        
+        Parameters in kwargs:
 
         :threadID:   numeric, cardinal thread identifier
         :cred:       login credentials (from the YAML file)
@@ -26,12 +28,7 @@ class GroupsReader (threading.Thread):
         """
 
         threading.Thread.__init__(self)
-        self.cred = cred
-        self.session = session
-        self.threadID = threadID
-        self.supQ = supQ
-        self.groupSaveQ = groupSaveQ
-        self.exitFlag = exitFlag
+        self.__dict__.update(kwargs)
         self.threadName = "GroupsReader"
 
     def run(self):

@@ -103,8 +103,16 @@ def main():
     t.start()
     threads.append(t)
 
-    t = GroupsReader(1, cred, session, groupsQueue,
-                     groupsEmailQueue, exitFlag)
+    kwargs = {
+        "threadID": 1,
+        "cred":     cred,
+        "session":  session,
+        "supQ":     groupsQueue,
+        "groupSaveQ": groupsEmailQueue,
+        "exitFlag": exitFlag
+    }
+        
+    t = GroupsReader(**kwargs)
     t.start()
     threads.append(t)
 

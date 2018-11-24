@@ -5,7 +5,8 @@ easily be imported into Salsa Engage.
 
 The general process is to read all supporters, filter out the ones that don't
 need to be exported, then export the rest as a CSV.  This app also exports 
-donations made by the supporters groups and the supporter belonged to.
+donations made by the supporters and the supporter groups to which a supporter
+belongs.
 
 The application starts from the command line.  The user provides a file
 containing Salsa campaign manager credentials.  The user may also set

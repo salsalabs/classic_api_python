@@ -1,1 +1,1 @@
-Python 2.7 doesn't do unicode very well.
+Python 2.7 doesn't do unicode very well.  Use python 3.6 or later.
