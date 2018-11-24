@@ -82,7 +82,7 @@ class GroupEmailSaver (threading.Thread):
     to CSV file(s).
     """
 
-    def __init__(self, threadID, groupsEmailQueue, outDir, exitFlag):
+    def __init__(self, **kwargs):
         """
         Initialize a GroupEmailSaver.
 
@@ -90,16 +90,13 @@ class GroupEmailSaver (threading.Thread):
 
         :threadID:  numeric cardinal thread identifier
         :groupsEmailQueue: queue to read (groupName, email) records
-        :outDir: where the CSV file(s) wil end up
+        :outputDir: where the CSV file(s) wil end up
         :extFiag: boolean indicating the end of processing
         """
 
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.threadName = "GroupEmailSaver"
-        self.groupsEmailQueue = groupsEmailQueue
-        self.outDir = outDir
-        self.exitFlag = exitFlag
+        self.__dict__.update(kwargs)
+        self.threadName = "GroupsSaver"
         self.csvfile = None
         self.maxRecs = 50000
         self.fileNum = 1
@@ -114,7 +111,7 @@ class GroupEmailSaver (threading.Thread):
 
         while True:
             fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
-            fn = os.path.join(self.outDir, fn)
+            fn = os.path.join(self.outputDir, fn)
             self.fileNum = self.fileNum + 1
             p = pathlib.Path(fn)
             if not p.is_file():

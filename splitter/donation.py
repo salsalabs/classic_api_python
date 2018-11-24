@@ -107,7 +107,7 @@ class DonationSaver (threading.Thread):
     Accepts donation records from a queue, then writes to to a CSV file.
     """
 
-    def __init__(self, threadID, donationSaveQueue, outDir, exitFlag):
+    def __init__(self, **kwargs):
         """
         Initialize a DonationSaver instance
         
@@ -115,16 +115,14 @@ class DonationSaver (threading.Thread):
         
         :threadID: numeric, cardinal thread identifier
         :donationSaveQueue: donation save queue, used to retrieve donations
-        :outDir:   directory where CSV file(s) are stored
+        :outputDir:   directory where CSV file(s) are stored
         :exitFlag: boolean that's true when processing should stop
         """
 
         threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.threadName = "DonationSaver"
-        self.donationSaveQueue = donationSaveQueue
-        self.outDir = outDir
-        self.exitFlag = exitFlag
+        self.__dict__.update(kwargs)
+        self.threadName = "DonationReader"
+
         self.csvfile = None
         self.maxRecs = 50000
         self.fileNum = 1
@@ -138,7 +136,7 @@ class DonationSaver (threading.Thread):
 
         while True:
             fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
-            fn = os.path.join(self.outDir, fn)
+            fn = os.path.join(self.outputDir, fn)
             self.fileNum = self.fileNum + 1
             p = pathlib.Path(fn)
             if not p.is_file():

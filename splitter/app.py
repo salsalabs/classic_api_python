@@ -1,6 +1,6 @@
-"""Application to read all supporters, filter out the ones that don't need to be
+'''Application to read all supporters, filter out the ones that don't need to be
 # exported, then export the rest as a CSV.  This app also exports donations, groups,
-# actions and events for the supporters."""
+# actions and events for the supporters.'''
 
 import argparse
 import requests
@@ -15,7 +15,7 @@ from supporter import SupporterReader, SupporterSaver
 
 
 def main():
-    """ The app starts a supporter reader and several listeners.  The reader
+    ''' The app starts a supporter reader and several listeners.  The reader
     retrieves qualified supporters from Salsa.  Each supporter is then passed
     to one of the first-tier listeners.
     
@@ -51,7 +51,7 @@ def main():
     Note:
     
     This application *will not* run with python2.  Use python3.
-    """
+    '''
     
     exitFlag = False
     supporterSaveQueue = LockedQueue()
@@ -78,64 +78,42 @@ def main():
     # Login.  Die if the crednentials are wrong.
     Authenticate(cred, session)
 
-    t = DonationSaver(1, donationSaveQueue, args.outputDir, exitFlag)
-    t.start()
-    threads.append(t)
-
-    t = GroupEmailSaver(1, groupsEmailQueue, args.outputDir, exitFlag)
-    t.start()
-    threads.append(t)
-
-    t = SupporterSaver(1, supporterSaveQueue, args.outputDir, exitFlag)
-    t.start()
-    threads.append(t)
-
+    # Common kwargs to reduce startup complexity.
     kwargs = {
-        "threadID": 1,
-        "cred":             cred,
-        "session":          session,
-        "donationQueue":    donationQueue,
-        "donationSaveQueue":         donationSaveQueue,
-        "supporterSaveQueue":         supporterSaveQueue,
-        "exitFlag":         exitFlag
+        'threadID':             1,
+        'cred':                 cred,
+        'session':              session,
+        'supporterSaveQueue':   supporterSaveQueue,
+        'groupsQueue':          groupsQueue,
+        'groupsEmailQueue':     groupsEmailQueue,
+        'donationQueue':        donationQueue,
+        'donationSaveQueue':    donationSaveQueue,
+        'exitFlag':             exitFlag,
+        'offset':               args.offset,
+        'outputDir':            args.outputDir,
+        'cond':                 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&Receive_Email>0'
     }
-    t = DonationReader(**kwargs)
-    t.start()
-    threads.append(t)
-
-    kwargs = {
-        "threadID": 1,
-        "cred":     cred,
-        "session":  session,
-        "groupsQueue":     groupsQueue,
-        "groupsEmailQueue": groupsEmailQueue,
-        "exitFlag": exitFlag
-    }
-        
-    t = GroupsReader(**kwargs)
-    t.start()
-    threads.append(t)
-
-    kwargs = {
-        "threadID": 1,
-        "cred":     cred,
-        "session":  session,
-        "cond":     'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&Receive_Email>0',
-        "supporterSaveQueue": supporterSaveQueue,
-        "groupQ":   groupsQueue,
-        "donationQueue":     donationQueue,
-        "offset":   args.offset,
-        "exitFlag": exitFlag
-    }
-    t = SupporterReader(**kwargs)
-    t.start()
-    threads.append(t)
+  
+    # List of threads to start. This is an ordered list.  The order assures that
+    # queues are open for reading before anyone tries to send to it.
+    tasks = [
+      DonationSaver,
+      GroupEmailSaver,
+      SupporterSaver,
+      DonationReader,
+      GroupsReader,
+      SupporterReader]
+    
+    for task in tasks:
+        t = task(**kwargs)
+        t.start()
+        threads.append(t)
 
     # Wait for all threads to complete
     for t in threads:
         t.join()
-    print("Exiting Main Thread")
+    print('Exiting main')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
