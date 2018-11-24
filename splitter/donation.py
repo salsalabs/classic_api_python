@@ -60,7 +60,7 @@ class DonationReader (threading.Thread):
             offset = 0
             count = 500
             while count == 500:
-                cond = "supporter_KEY=%s&condition=RESULT IN 0,-1" % supporter["supporter_KEY"]
+                cond = f"supporter_KEY={supporter['supporter_KEY']}&condition=RESULT IN 0,-1"
                 payload = {'json': True,
                            "limit": "%d,%d" % (offset, count),
                            'object': 'donation',

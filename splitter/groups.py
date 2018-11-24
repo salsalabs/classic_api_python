@@ -50,10 +50,14 @@ class GroupsReader (threading.Thread):
             supporter = self.groupsQueue.get()
             if not supporter:
                 continue
+            email = str.strip(supporter["Email"])
+            if len(email) == 0:
+                continue
+
             offset = 0
             count = 500
             while count == 500:
-                cond = "supporter_KEY=%s&condition=Group_Name IS NOT EMPTY" % supporter["supporter_KEY"]
+                cond = f"supporter_KEY={supporter['supporter_KEY']}&condition=Group_Name IS NOT EMPTY"
                 payload = {'json': True,
                            "limit": "%d,%d" % (offset, count),
                            'object': 'supporter_groups(groups_KEY)groups',
@@ -67,9 +71,8 @@ class GroupsReader (threading.Thread):
                 # queue.
                 for group in j:
                     g = str.strip(group["Group_Name"])
-                    e = str.strip(supporter["Email"])
-                    if len(g) > 0 and len(e) > 0:
-                        r = { "Group": g, "Email": e }
+                    if len(g) > 0:
+                        r = { "Group": g, "Email": email }
                         self.groupsEmailQueue.put(r)
 
                 count = len(j)
