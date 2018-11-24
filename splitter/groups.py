@@ -117,7 +117,8 @@ class GroupSaver (SaverBase):
                     count = count + 1
 
                 except UnicodeEncodeError:
-                    print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, r))
+                    print(f"{self.threadName}_{self.threadID:02d}: UnicodeEncodeError on {r}")
+
 
 GroupsMap = {
     "Group": "Group",

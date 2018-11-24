@@ -64,7 +64,7 @@ class SupporterReader (threading.Thread):
                        'condition': self.cond,
                        'include': self.incl}
             u = f"https://{self.cred['host']}/api/getObjects.sjs"
-            print(("%s_%02d: reading %d from %7d" % (self.threadName, self.threadID, count, offset)))
+            print(f"{self.threadName}_{self.threadID:02d}: reading {count} from {offset:7d}")
             r = self.session.get(u, params=payload)
             j = r.json()
 
@@ -134,7 +134,7 @@ class SupporterSaver (SaverBase):
                 self.writer.writerow(m)
                 count = count + 1
             except UnicodeEncodeError:
-                    print(("%s_%02d: UnicodeEncodeError on %s", self.threadName, self.threadID, supporter))
+                print(f"{self.threadName}_{self.threadID:02d}: UnicodeEncodeError on {supporter}")
 
 SupporterMap = {
     "ExternalID": "supporter_KEY",

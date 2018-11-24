@@ -40,7 +40,7 @@ class SaverBase (threading.Thread):
         """
 
         while True:
-            fn = f"%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
+            fn = f"{self.fileRoot}_{self.threadID:02d}_{self.fileNum:02d}.csv"
             fn = os.path.join(self.outputDir, fn)
             self.fileNum = self.fileNum + 1
             p = pathlib.Path(fn)
