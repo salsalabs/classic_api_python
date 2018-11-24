@@ -31,7 +31,8 @@ class SupporterReader (threading.Thread):
 
         threading.Thread.__init__(self)
         self.__dict__.update(kwargs)
-        self.threadName = "SupporterReader"
+        self.threadName = type(self).__name__
+
         x = []
         for k, v in SupporterMap.items():
             if v :
@@ -99,7 +100,8 @@ class SupporterSaver (threading.Thread):
 
         threading.Thread.__init__(self)
         self.__dict__.update(kwargs)
-        self.threadName = "SupporterReader"
+        self.threadName = type(self).__name__
+        self.fileRoot = self.threadName.replace("Saver", "").replace("Reader","" ).lower()
         self.csvfile = None
         self.maxRecs = 50000
         self.fileRoot = "supporters"

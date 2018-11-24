@@ -8,7 +8,7 @@ import time
 import yaml
 
 from donation import DonationReader, DonationSaver
-from groups import GroupsReader, GroupEmailSaver
+from groups import GroupsReader, GroupSaver
 from lckqueue import LockedQueue
 from salsa import Authenticate
 from supporter import SupporterReader, SupporterSaver
@@ -98,7 +98,7 @@ def main():
     # queues are open for reading before anyone tries to send to it.
     tasks = [
       DonationSaver,
-      GroupEmailSaver,
+      GroupSaver,
       SupporterSaver,
       DonationReader,
       GroupsReader,

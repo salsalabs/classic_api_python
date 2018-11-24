@@ -29,7 +29,7 @@ class GroupsReader (threading.Thread):
 
         threading.Thread.__init__(self)
         self.__dict__.update(kwargs)
-        self.threadName = "GroupsReader"
+        self.threadName = type(self).__name__
 
     def run(self):
         """
@@ -76,7 +76,7 @@ class GroupsReader (threading.Thread):
                 offset += count
 
 
-class GroupEmailSaver (threading.Thread):
+class GroupSaver (threading.Thread):
     """
     Accepts (groupName, email) records from a queue and writes them to
     to CSV file(s).
@@ -84,7 +84,7 @@ class GroupEmailSaver (threading.Thread):
 
     def __init__(self, **kwargs):
         """
-        Initialize a GroupEmailSaver.
+        Initialize a GroupSaver.
 
         Params:
 
@@ -96,12 +96,12 @@ class GroupEmailSaver (threading.Thread):
 
         threading.Thread.__init__(self)
         self.__dict__.update(kwargs)
-        self.threadName = "GroupsSaver"
+
+        self.threadName = type(self).__name__
+        self.fileRoot = self.threadName.replace("Saver", "").replace("Reader","" ).lower()
         self.csvfile = None
         self.maxRecs = 50000
         self.fileNum = 1
-        self.fileRoot = "groups"
-
 
     def openFile(self):
         """
