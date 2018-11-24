@@ -45,7 +45,7 @@ class SupporterReader (threading.Thread):
         Run the thread.  Overrides Threading.run()
         """
 
-        print("Running " + self.threadName)
+        print("Starting " + self.threadName)
         self.process_data()
         print("Ending  " + self.threadName)
 
