@@ -21,8 +21,8 @@ class DonationReader (threading.Thread):
         :cred:          login credentials (from the YAML file)
         :session:       requests session to use to read from Salsa
         :donationQueue: supporter queue.  Reads this to get supporters
-        :donSaveQ:      donation request queue
-        :supSaveQ:      queue to receive inactive supporters with donation history
+        :donationSaveQueue:      donation request queue
+        :supporterSaveQueue:      queue to receive inactive supporters with donation history
         :exitFlag:      boolean that's true when processing should stop
         """
 
@@ -77,7 +77,7 @@ class DonationReader (threading.Thread):
                 # Supporter had donations.  If this supporter is no longer active,
                 # then send the supporter record to the supporter save queue.
                 if supporter['Receive_Email'] == "Unsubscribed":
-                    self.supSaveQ.put(supporter)
+                    self.supporterSaveQueue.put(supporter)
     
                 # Iterate through the donations, transmogrify as needed, then put them onto
                 # the donation saver queue.
@@ -99,7 +99,7 @@ class DonationReader (threading.Thread):
                                 f = "%a %b %d %Y %H:%M:%S"
                                 x = datetime.datetime.strptime(x, f)
                                 d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
-                    self.donSaveQ.put(d)
+                    self.donationSaveQueue.put(d)
 
 
 class DonationSaver (threading.Thread):
@@ -107,14 +107,14 @@ class DonationSaver (threading.Thread):
     Accepts donation records from a queue, then writes to to a CSV file.
     """
 
-    def __init__(self, threadID, donSaveQ, outDir, exitFlag):
+    def __init__(self, threadID, donationSaveQueue, outDir, exitFlag):
         """
         Initialize a DonationSaver instance
         
         Params:
         
         :threadID: numeric, cardinal thread identifier
-        :donSaveQ: donation save queue, used to retrieve donations
+        :donationSaveQueue: donation save queue, used to retrieve donations
         :outDir:   directory where CSV file(s) are stored
         :exitFlag: boolean that's true when processing should stop
         """
@@ -122,7 +122,7 @@ class DonationSaver (threading.Thread):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "DonationSaver"
-        self.donSaveQ = donSaveQ
+        self.donationSaveQueue = donationSaveQueue
         self.outDir = outDir
         self.exitFlag = exitFlag
         self.csvfile = None
@@ -181,7 +181,7 @@ class DonationSaver (threading.Thread):
 
         count = self.maxRecs
         while not self.exitFlag:
-            r = self.donSaveQ.get()
+            r = self.donationSaveQueue.get()
             if not r:
                 continue
             try:

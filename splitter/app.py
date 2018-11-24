@@ -95,8 +95,8 @@ def main():
         "cred":             cred,
         "session":          session,
         "donationQueue":    donationQueue,
-        "donSaveQ":         donationSaveQueue,
-        "supSaveQ":         supporterSaveQueue,
+        "donationSaveQueue":         donationSaveQueue,
+        "supporterSaveQueue":         supporterSaveQueue,
         "exitFlag":         exitFlag
     }
     t = DonationReader(**kwargs)
@@ -108,7 +108,7 @@ def main():
         "cred":     cred,
         "session":  session,
         "groupsQueue":     groupsQueue,
-        "groupSaveQ": groupsEmailQueue,
+        "groupsEmailQueue": groupsEmailQueue,
         "exitFlag": exitFlag
     }
         
@@ -121,9 +121,9 @@ def main():
         "cred":     cred,
         "session":  session,
         "cond":     'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&Receive_Email>0',
-        "supSaveQ": supporterSaveQueue,
+        "supporterSaveQueue": supporterSaveQueue,
         "groupQ":   groupsQueue,
-        "donQ":     donationQueue,
+        "donationQueue":     donationQueue,
         "offset":   args.offset,
         "exitFlag": exitFlag
     }

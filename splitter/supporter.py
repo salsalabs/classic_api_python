@@ -12,7 +12,7 @@ class SupporterReader (threading.Thread):
     singly to the output queues.
     """
 
-    def __init__(self, **kwargs): #threadID, cred, session, cond, supSaveQ, groupQ, donQ, start, exitFlag):
+    def __init__(self, **kwargs): #threadID, cred, session, cond, supporterSaveQueue, groupQ, donationQueue, start, exitFlag):
         """
         Initialize a SupporterReader object
         
@@ -22,9 +22,9 @@ class SupporterReader (threading.Thread):
         :cred:     login credentials (from the YAML file)
         :session:  requests object to read from Salsa
         :cond:     conditions to use to filter supporters
-        :supSaveQ: supporter save queue
+        :supporterSaveQueue: supporter save queue
         :groupQ:   group save queue
-        :donQ:     donation sqve queue
+        :donationQueue:     donation sqve queue
         :start:    starting offset in the Salsa database
         :exitFlag: boolean indicating when processing should stop
         """
@@ -69,8 +69,8 @@ class SupporterReader (threading.Thread):
             # Iterate through the records and push each onto the output queues.
             for supporter in j:
                 if supporter["Receive_Email"] != "Unsubscribed":
-                    self.supSaveQ.put(supporter)
-                    self.donQ.put(supporter)
+                    self.supporterSaveQueue.put(supporter)
+                    self.donationQueue.put(supporter)
                 # Donations processor will write donation records for all supporters
                 # with emails.  Donations will queue up supporter records for 
                 # supporters with donation history.
@@ -85,14 +85,14 @@ class SupporterSaver (threading.Thread):
     Accepts supporter recvords from a queue and writes them to a CSV file.
     """
 
-    def __init__(self, threadID, supSaveQ, outDir, exitFlag):
+    def __init__(self, threadID, supporterSaveQueue, outDir, exitFlag):
         """
         Initialize a SupporterSaver object
         
         Params:
         
         :threadID: numeric cardinal thread ID
-        :supSaveQ: supporter queue
+        :supporterSaveQueue: supporter queue
         :outDir:   directory where the CSV file(s) wil be stored
         :exitFlag: boolean indicating the processing is complete
         """
@@ -100,7 +100,7 @@ class SupporterSaver (threading.Thread):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "SupporterSaver"
-        self.supSaveQ = supSaveQ
+        self.supporterSaveQueue = supporterSaveQueue
         self.outDir = outDir
         self.exitFlag = exitFlag
         self.csvfile = None
@@ -155,7 +155,7 @@ class SupporterSaver (threading.Thread):
 
         count = self.maxRecs
         while not self.exitFlag:
-            supporter = self.supSaveQ.get()
+            supporter = self.supporterSaveQueue.get()
             if not supporter:
                 continue
             if count >= self.maxRecs:

@@ -8,7 +8,7 @@ import threading
 class GroupsReader (threading.Thread):
     """
     Read supporters from a queue, find the groups that the supporter belongs
-    to, then write individual (group_Name, email) records to the groupSaveQput queue.
+    to, then write individual (group_Name, email) records to the groupsEmailQueueput queue.
     """
 
     def __init__(self, **kwargs):
@@ -23,7 +23,7 @@ class GroupsReader (threading.Thread):
         :cred:          login credentials (from the YAML file)
         :session:       requests session used to read from Salsa
         :groupsQueue:   queue to read to retrieve supporters
-        :groupSaveQ:    queue to write to read and save groups
+        :groupsEmailQueue:    queue to write to read and save groups
         :exitFlag:      boolean flag to indicate that processing has completed
         """
 
@@ -70,7 +70,7 @@ class GroupsReader (threading.Thread):
                     e = str.strip(supporter["Email"])
                     if len(g) > 0 and len(e) > 0:
                         r = { "Group": g, "Email": e }
-                        self.groupSaveQ.put(r)
+                        self.groupsEmailQueue.put(r)
 
                 count = len(j)
                 offset += count
@@ -82,14 +82,14 @@ class GroupEmailSaver (threading.Thread):
     to CSV file(s).
     """
 
-    def __init__(self, threadID, groupSaveQ, outDir, exitFlag):
+    def __init__(self, threadID, groupsEmailQueue, outDir, exitFlag):
         """
         Initialize a GroupEmailSaver.
 
         Params:
 
         :threadID:  numeric cardinal thread identifier
-        :groupSaveQ: queue to read (groupName, email) records
+        :groupsEmailQueue: queue to read (groupName, email) records
         :outDir: where the CSV file(s) wil end up
         :extFiag: boolean indicating the end of processing
         """
@@ -97,7 +97,7 @@ class GroupEmailSaver (threading.Thread):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.threadName = "GroupEmailSaver"
-        self.groupSaveQ = groupSaveQ
+        self.groupsEmailQueue = groupsEmailQueue
         self.outDir = outDir
         self.exitFlag = exitFlag
         self.csvfile = None
@@ -153,7 +153,7 @@ class GroupEmailSaver (threading.Thread):
 
         count = self.maxRecs
         while not self.exitFlag:
-            r = self.groupSaveQ.get()
+            r = self.groupsEmailQueue.get()
             if r and r["Group"] and r["Email"]:
                 try:
                     if count >= self.maxRecs:
