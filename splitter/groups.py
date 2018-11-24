@@ -19,12 +19,12 @@ class GroupsReader (threading.Thread):
         
         Parameters in kwargs:
 
-        :threadID:   numeric, cardinal thread identifier
-        :cred:       login credentials (from the YAML file)
-        :session:    requests session used to read from Salsa
-        :supQ:       queue to read to retrieve supporters
-        :groupSaveQ: queue to write to read and save groups
-        :exitFlag:   boolean flag to indicate that processing has completed
+        :threadID:      numeric, cardinal thread identifier
+        :cred:          login credentials (from the YAML file)
+        :session:       requests session used to read from Salsa
+        :groupsQueue:   queue to read to retrieve supporters
+        :groupSaveQ:    queue to write to read and save groups
+        :exitFlag:      boolean flag to indicate that processing has completed
         """
 
         threading.Thread.__init__(self)
@@ -47,7 +47,7 @@ class GroupsReader (threading.Thread):
         """
 
         while not self.exitFlag:
-            supporter = self.supQ.get()
+            supporter = self.groupsQueue.get()
             if not supporter:
                 continue
             offset = 0

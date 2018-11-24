@@ -92,12 +92,12 @@ def main():
 
     kwargs = {
         "threadID": 1,
-        "cred":     cred,
-        "session":  session,
-        "supQ":     donationQueue,
-        "donSaveQ": donationSaveQueue,
-        "supSaveQ": supporterSaveQueue,
-        "exitFlag": exitFlag
+        "cred":             cred,
+        "session":          session,
+        "donationQueue":    donationQueue,
+        "donSaveQ":         donationSaveQueue,
+        "supSaveQ":         supporterSaveQueue,
+        "exitFlag":         exitFlag
     }
     t = DonationReader(**kwargs)
     t.start()
@@ -107,7 +107,7 @@ def main():
         "threadID": 1,
         "cred":     cred,
         "session":  session,
-        "supQ":     groupsQueue,
+        "groupsQueue":     groupsQueue,
         "groupSaveQ": groupsEmailQueue,
         "exitFlag": exitFlag
     }

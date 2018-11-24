@@ -17,13 +17,13 @@ class DonationReader (threading.Thread):
         
         Parameters in kwargs:
         
-        :threadID: thread number, generally cardinal
-        :cred:     login credentials (from the YAML file)
-        :session:  requests session to use to read from Salsa
-        :supQ:     supporter queue.  Reads this to get supporters
-        :donSaveQ: donation request queue
-        :supSaveQ: queue to receive inactive supporters with donation history
-        :exitFlag: boolean that's true when processing should stop
+        :threadID:      thread number, generally cardinal
+        :cred:          login credentials (from the YAML file)
+        :session:       requests session to use to read from Salsa
+        :donationQueue: supporter queue.  Reads this to get supporters
+        :donSaveQ:      donation request queue
+        :supSaveQ:      queue to receive inactive supporters with donation history
+        :exitFlag:      boolean that's true when processing should stop
         """
 
         threading.Thread.__init__(self)
@@ -53,7 +53,7 @@ class DonationReader (threading.Thread):
         """
 
         while not self.exitFlag:
-            supporter = self.supQ.get()
+            supporter = self.donationQueue.get()
             if not supporter:
                 continue
             offset = 0
