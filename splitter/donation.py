@@ -62,11 +62,11 @@ class DonationReader (threading.Thread):
             while count == 500:
                 cond = f"supporter_KEY={supporter['supporter_KEY']}&condition=RESULT IN 0,-1"
                 payload = {'json': True,
-                           "limit": "%d,%d" % (offset, count),
+                           "limit": f"{offset},{count}",
                            'object': 'donation',
                            'condition': cond,
                            'include': self.incl}
-                u = 'https://' + self.cred['host'] + '/api/getLeftJoin.sjs'
+                u = f"https://{self.cred['host']}/api/getObjects.sjs"
                 r = self.session.get(u, params=payload)
                 j = r.json()
 

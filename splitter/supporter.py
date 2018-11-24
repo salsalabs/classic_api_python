@@ -59,11 +59,11 @@ class SupporterReader (threading.Thread):
         count = 500
         while count == 500:
             payload = {'json': True,
-                       "limit": "%d,%d" % (offset, count),
+                       "limit": f"{offset},{count}",
                        'object': 'supporter',
                        'condition': self.cond,
                        'include': self.incl}
-            u = 'https://' + self.cred['host'] + '/api/getObjects.sjs'
+            u = f"https://{self.cred['host']}/api/getObjects.sjs"
             print(("%s_%02d: reading %d from %7d" % (self.threadName, self.threadID, count, offset)))
             r = self.session.get(u, params=payload)
             j = r.json()

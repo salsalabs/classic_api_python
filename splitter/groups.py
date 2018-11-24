@@ -59,11 +59,11 @@ class GroupsReader (threading.Thread):
             while count == 500:
                 cond = f"supporter_KEY={supporter['supporter_KEY']}&condition=Group_Name IS NOT EMPTY"
                 payload = {'json': True,
-                           "limit": "%d,%d" % (offset, count),
+                           "limit": f"{offset},{count}",
                            'object': 'supporter_groups(groups_KEY)groups',
                            'condition': cond,
                            'include': 'groups.Group_Name'}
-                u = 'https://' + self.cred['host'] + '/api/getLeftJoin.sjs'
+                u = f"https://{self.cred['host']}/api/getLeftJoin.sjs"
                 r = self.session.get(u, params=payload)
                 j = r.json()
 
