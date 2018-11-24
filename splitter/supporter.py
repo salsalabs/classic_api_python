@@ -5,6 +5,7 @@ import os.path
 import pathlib
 import threading
 
+from saver_base import SaverBase
 
 class SupporterReader (threading.Thread):
     """
@@ -12,7 +13,7 @@ class SupporterReader (threading.Thread):
     singly to the output queues.
     """
 
-    def __init__(self, **kwargs): #threadID, cred, session, cond, supporterSaveQueue, groupsQueue, donationQueue, start, exitFlag):
+    def __init__(self, **kwargs):
         """
         Initialize a SupporterReader object
         
@@ -71,80 +72,31 @@ class SupporterReader (threading.Thread):
             for supporter in j:
                 if supporter["Receive_Email"] != "Unsubscribed":
                     self.supporterSaveQueue.put(supporter)
+                    # Donations processor will write donation records for all supporters
+                    # with emails.  Donations will queue up supporter records for 
+                    # supporters with donation history.
                     self.donationQueue.put(supporter)
-                # Donations processor will write donation records for all supporters
-                # with emails.  Donations will queue up supporter records for 
-                # supporters with donation history.
                 self.groupsQueue.put(supporter)
 
             count = len(j)
             offset += count
 
-
-class SupporterSaver (threading.Thread):
+class SupporterSaver (SaverBase):
     """
-    Accepts supporter recvords from a queue and writes them to a CSV file.
+    Accepts Group records from a queue, then write them to a CSV file.
     """
 
     def __init__(self, **kwargs):
         """
-        Initialize a SupporterSaver object
-        
-        Params:
-        
-        :threadID: numeric cardinal thread ID
-        :supporterSaveQueue: supporter queue
-        :outputDir:   directory where the CSV file(s) wil be stored
-        :exitFlag: boolean indicating the processing is complete
+        Initialize a GroupSaver instance
         """
+        SaverBase.__init__(self, **kwargs)
 
-        threading.Thread.__init__(self)
-        self.__dict__.update(kwargs)
-        self.threadName = type(self).__name__
-        self.fileRoot = self.threadName.replace("Saver", "").replace("Reader","" ).lower()
-        self.csvfile = None
-        self.maxRecs = 50000
-        self.fileRoot = "supporters"
-        self.fileNum = 1
-
-    def openFile(self):
+    def getFieldMap(self):
         """
-        Open a new CSV output file.  The filename contains the thread ID
-        and the current file serial number.
+        Specify the output fields for the CSV file.  Overrides SaverBase.getFieldMap();
         """
-
-        while True:
-            fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
-            fn = os.path.join(self.outputDir, fn)
-            self.fileNum = self.fileNum + 1
-            p = pathlib.Path(fn)
-            if not p.is_file():
-                break
-
-        d = os.path.dirname(fn)
-        if not os.path.exists(d):
-            os.makedirs(d)
-        if self.csvfile != None:
-            self.csvfile.flush()
-            self.csvfile.close()
-        self.csvfile = open(fn, "w")
-        fieldnames = []
-        for k, v in SupporterMap.items():
-            if v:
-                fieldnames.append(k)
-        self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
-        self.writer.writeheader()
-
-    def run(self):
-        """
-        Run the process.  Overrides Threading.run()
-        """
-    
-        print(("Starting:" + self.threadName))
-        self.process_data()
-        self.csvfile.flush()
-        self.csvfile.close()
-        print(("Ending  " + self.threadName))
+        return SupporterMap
 
     def process_data(self):
         """
@@ -175,7 +127,7 @@ class SupporterSaver (threading.Thread):
             # Create a new dict of Engage headers and Classic values.
             m = {}
             for k in SupportMapOrder:
-                v = SupporterMap[k]
+                v = self.getFieldMap()[k]
                 if v:
                     m[k] = str.strip(supporter[v])
             try:

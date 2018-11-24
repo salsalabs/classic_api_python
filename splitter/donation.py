@@ -6,6 +6,7 @@ import os.path
 import pathlib
 import threading
 
+from saver_base import SaverBase
 
 class DonationReader (threading.Thread):
     """Read supporters from a queue, find the donations for the supporters, 
@@ -102,79 +103,28 @@ class DonationReader (threading.Thread):
                     self.donationSaveQueue.put(d)
 
 
-class DonationSaver (threading.Thread):
+class DonationSaver (SaverBase):
     """
-    Accepts donation records from a queue, then writes to to a CSV file.
+    Accepts donation records from a queue, then write them to a CSV file.
     """
 
     def __init__(self, **kwargs):
         """
         Initialize a DonationSaver instance
-        
-        Params:
-        
-        :threadID: numeric, cardinal thread identifier
-        :donationSaveQueue: donation save queue, used to retrieve donations
-        :outputDir:   directory where CSV file(s) are stored
-        :exitFlag: boolean that's true when processing should stop
         """
+        SaverBase.__init__(self, **kwargs)
 
-        threading.Thread.__init__(self)
-        self.__dict__.update(kwargs)
-
-        self.threadName = type(self).__name__
-        self.fileRoot = self.threadName.replace("Saver", "").replace("Reader","" ).lower()
-        self.csvfile = None
-        self.maxRecs = 50000
-        self.fileNum = 1
-
-    def openFile(self):
+    def getFieldMap(self):
         """
-        Open a CSV filename.  The filename contains the thread ID and the current
-        file serial number.
+        Specify the output fields for the CSV file.  Overrides SaverBase.getFieldMap();
         """
-
-        while True:
-            fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
-            fn = os.path.join(self.outputDir, fn)
-            self.fileNum = self.fileNum + 1
-            p = pathlib.Path(fn)
-            if not p.is_file():
-                break
-
-        d = os.path.dirname(fn)
-        if not os.path.exists(d):
-            os.makedirs(d)
-        if self.csvfile != None:
-            self.csvfile.flush()
-            self.csvfile.close()
-        self.csvfile = open(fn, "w")
-        fieldnames = []
-        for k, v in DonationMap.items():
-            if v:
-                fieldnames.append(k)
-        self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
-        self.writer.writeheader()
-        self.csvfile.flush()
-
-    def run(self):
-        """
-        Run the thread.  overrides Thread.run().
-        """
-
-        print(("Starting " + self.threadName))
-        self.process_data()
-        self.csvfile.flush()
-        self.csvfile.close()
-        print(("Ending  " + self.threadName))
+        return DonationMap
 
     def process_data(self):
         """
         Read donations from the donation queue, format them, then write them to
-        the CSV file.
-        
-        Note that inactive supporter records that have donations are written
-        to the supporter save queue.
+        the CSV file.  Overrides SaverBase.process_data to accept and save
+        donations.
         """
 
         count = self.maxRecs

@@ -4,6 +4,7 @@ import os.path
 import pathlib
 import threading
 
+from saver_base import SaverBase
 
 class GroupsReader (threading.Thread):
     """
@@ -13,9 +14,8 @@ class GroupsReader (threading.Thread):
 
     def __init__(self, **kwargs):
 
-
         """
-        Initialize a DonationReader instance.
+        Initialize a GroupsReader instance.
         
         Parameters in kwargs:
 
@@ -63,7 +63,7 @@ class GroupsReader (threading.Thread):
                 r = self.session.get(u, params=payload)
                 j = r.json()
 
-                # Iterate through the groups and push them onto the (groups,email)_
+                # Iterate through the groups and push them onto the (groups,email)
                 # queue.
                 for group in j:
                     g = str.strip(group["Group_Name"])
@@ -75,72 +75,22 @@ class GroupsReader (threading.Thread):
                 count = len(j)
                 offset += count
 
-
-class GroupSaver (threading.Thread):
+class GroupSaver (SaverBase):
     """
-    Accepts (groupName, email) records from a queue and writes them to
-    to CSV file(s).
+    Accepts Group records from a queue, then write them to a CSV file.
     """
 
     def __init__(self, **kwargs):
         """
-        Initialize a GroupSaver.
-
-        Params:
-
-        :threadID:  numeric cardinal thread identifier
-        :groupsEmailQueue: queue to read (groupName, email) records
-        :outputDir: where the CSV file(s) wil end up
-        :extFiag: boolean indicating the end of processing
+        Initialize a GroupSaver instance
         """
+        SaverBase.__init__(self, **kwargs)
 
-        threading.Thread.__init__(self)
-        self.__dict__.update(kwargs)
-
-        self.threadName = type(self).__name__
-        self.fileRoot = self.threadName.replace("Saver", "").replace("Reader","" ).lower()
-        self.csvfile = None
-        self.maxRecs = 50000
-        self.fileNum = 1
-
-    def openFile(self):
+    def getFieldMap(self):
         """
-        Open a new CSV file.  The filename contains the thread ID and
-        a current file serial number.
+        Specify the output fields for the CSV file.  Overrides SaverBase.getFieldMap();
         """
-
-        while True:
-            fn = "%s_%02d_%02d.csv" % (self.fileRoot, self.threadID, self.fileNum)
-            fn = os.path.join(self.outputDir, fn)
-            self.fileNum = self.fileNum + 1
-            p = pathlib.Path(fn)
-            if not p.is_file():
-                break
-
-        d = os.path.dirname(fn)
-        if not os.path.exists(d):
-            os.makedirs(d)
-        if self.csvfile != None:
-            self.csvfile.flush()
-            self.csvfile.close()
-        self.csvfile = open(fn, "w")
-        fieldnames = []
-        for k, v in GroupsMap.items():
-            if v:
-                fieldnames.append(k)
-        self.writer = csv.DictWriter(self.csvfile, fieldnames=fieldnames)
-        self.writer.writeheader()
-
-    def run(self):
-        """
-        Run the thread.  Overrides Threading.run()
-        """
-
-        print(("Starting " + self.threadName))
-        self.process_data()
-        self.csvfile.flush()
-        self.csvfile.close()
-        print(("Ending  " + self.threadName))
+        return GroupsMap
 
     def process_data(self):
         """
@@ -157,7 +107,7 @@ class GroupSaver (threading.Thread):
                         count = 0
                         self.openFile()
                     d = {}
-                    for k, v in GroupsMap.items():
+                    for k, v in self.getFieldMap().items():
                         d[k] = r[v]
 
                     self.writer.writerow(d)
