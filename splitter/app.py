@@ -81,8 +81,8 @@ def main():
 
     #Default level is INFO so that Python internals won't log debug messages.
     logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(name)-16s %(levelname)-8s %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%s',
+                        format='%(asctime)s %(name)-18s %(levelname)-8s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
                         filename='./splitter.log',
                         filemode='a')
     console = logging.StreamHandler()

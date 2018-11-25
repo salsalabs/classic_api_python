@@ -1,5 +1,6 @@
 import csv
 import os
+import logging
 import os.path
 import pathlib
 import threading
@@ -32,6 +33,14 @@ class SupporterReader (threading.Thread):
         threading.Thread.__init__(self)
         self.__dict__.update(kwargs)
         self.threadName = type(self).__name__
+        
+        logName = f"{self.threadName}_{self.threadID:02d}"
+        self.log = logging.getLogger(logName)
+        console = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s: %(name)-18s %(levelname)-8s %(message)s')
+        console.setFormatter(formatter)
+        console.setLevel(logging.DEBUG)
+        self.log.addHandler(console)
 
         x = []
         for k, v in SupporterMap.items():
@@ -44,7 +53,7 @@ class SupporterReader (threading.Thread):
         Run the thread.  Overrides Threading.run()
         """
 
-        self.log.info("Starting " + self.threadName)
+        self.log.info('starting')
         self.process_data()
         self.log.info("Ending  " + self.threadName)
 
@@ -63,7 +72,7 @@ class SupporterReader (threading.Thread):
                        'condition': self.cond,
                        'include': self.incl}
             u = f"https://{self.cred['host']}/api/getObjects.sjs"
-            self.log.info(f"{self.threadName}_{self.threadID:02d}: reading {count} from {offset:7d}")
+            self.log.info(f"reading {count} from {offset:7d}")
             r = self.session.get(u, params=payload)
             j = r.json()
 

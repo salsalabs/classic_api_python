@@ -1,6 +1,7 @@
 import csv
 import datetime
 import json
+import logging
 import os
 import os.path
 import pathlib
@@ -30,6 +31,14 @@ class DonationReader (threading.Thread):
         threading.Thread.__init__(self)
         self.__dict__.update(kwargs)
         self.threadName = type(self).__name__
+        
+        logName = f"{self.threadName}_{self.threadID:02d}"
+        self.log = logging.getLogger(logName)
+        console = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s: %(name)-18s %(levelname)-8s %(message)s')
+        console.setFormatter(formatter)
+        console.setLevel(logging.DEBUG)
+        self.log.addHandler(console)
 
         x = []
         for k, v in DonationMap.items():
@@ -42,9 +51,9 @@ class DonationReader (threading.Thread):
         Run the thread.  overrides Thread.run().
         """
 
-        self.log.info(("Starting " + self.threadName))
+        self.log.info('starting')
         self.process_data()
-        self.log.info(("Ending   " + self.threadName))
+        self.log.info('ending')
 
     def process_data(self):
         """
