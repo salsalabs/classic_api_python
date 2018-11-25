@@ -79,8 +79,8 @@ def main():
     # Login.  Die if the crednentials are wrong.
     Authenticate(cred, session)
 
-    import logging
-    logging.basicConfig(level=logging.DEBUG,
+    #Default level is INFO so that Python internals won't log debug messages.
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(name)-16s %(levelname)-8s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%s',
                         filename='./splitter.log',
