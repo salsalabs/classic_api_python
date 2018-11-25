@@ -1,5 +1,4 @@
 import csv
-import threading
 import os
 import os.path
 import pathlib
