@@ -42,9 +42,9 @@ class DonationReader (threading.Thread):
         Run the thread.  overrides Thread.run().
         """
 
-        print(("Starting " + self.threadName))
+        self.log.info(("Starting " + self.threadName))
         self.process_data()
-        print(("Ending   " + self.threadName))
+        self.log.info(("Ending   " + self.threadName))
 
     def process_data(self):
         """
@@ -136,13 +136,13 @@ class DonationSaver (SaverBase):
                 if count >= self.maxRecs:
                     count = 0
                     self.openFile()
-                # print(r)
+                # self.log.info(r)
                 self.writer.writerow(r)
                 self.csvfile.flush()
                 count = count + 1
 
             except UnicodeEncodeError:
-                print(f"{self.threadName}_{self.threadID:02d}: UnicodeEncodeError on {r}")
+                self.log.error(f"{self.threadName}_{self.threadID:02d}: UnicodeEncodeError on {r}")
 
 DonationMap = {
     "supporter_KEY":    "supporter_KEY",

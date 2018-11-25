@@ -45,9 +45,9 @@ class SupporterReader (threading.Thread):
         Run the thread.  Overrides Threading.run()
         """
 
-        print("Starting " + self.threadName)
+        self.log.info("Starting " + self.threadName)
         self.process_data()
-        print("Ending  " + self.threadName)
+        self.log.info("Ending  " + self.threadName)
 
     def process_data(self):
         """
@@ -64,7 +64,7 @@ class SupporterReader (threading.Thread):
                        'condition': self.cond,
                        'include': self.incl}
             u = f"https://{self.cred['host']}/api/getObjects.sjs"
-            print(f"{self.threadName}_{self.threadID:02d}: reading {count} from {offset:7d}")
+            self.log.info(f"{self.threadName}_{self.threadID:02d}: reading {count} from {offset:7d}")
             r = self.session.get(u, params=payload)
             j = r.json()
 
@@ -134,7 +134,7 @@ class SupporterSaver (SaverBase):
                 self.writer.writerow(m)
                 count = count + 1
             except UnicodeEncodeError:
-                print(f"{self.threadName}_{self.threadID:02d}: UnicodeEncodeError on {supporter}")
+                self.log.error(f"{self.threadName}_{self.threadID:02d}: UnicodeEncodeError on {supporter}")
 
 SupporterMap = {
     "ExternalID": "supporter_KEY",

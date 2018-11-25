@@ -67,11 +67,11 @@ class SaverBase (threading.Thread):
         close the CSV file.
         """
 
-        print(("Starting " + self.threadName))
+        self.log.info(("Starting " + self.threadName))
         self.process_data()
         self.csvfile.flush()
         self.csvfile.close()
-        print(("Ending  " + self.threadName))
+        self.log.info(("Ending  " + self.threadName))
 
     def process_data(self):
         """

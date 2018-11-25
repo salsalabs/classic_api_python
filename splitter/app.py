@@ -3,6 +3,7 @@
 # actions and events for the supporters.'''
 
 import argparse
+import logging
 import requests
 import time
 import yaml
@@ -78,6 +79,19 @@ def main():
     # Login.  Die if the crednentials are wrong.
     Authenticate(cred, session)
 
+    import logging
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(name)-16s %(levelname)-8s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%s',
+                        filename='./splitter.log',
+                        filemode='a')
+    console = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    console.setLevel(logging.DEBUG)
+    log = logging.getLogger(__name__)
+    log.addHandler(console)
+
     # Common kwargs to reduce startup complexity.
     kwargs = {
         'threadID':             1,
@@ -89,6 +103,7 @@ def main():
         'donationQueue':        donationQueue,
         'donationSaveQueue':    donationSaveQueue,
         'exitFlag':             exitFlag,
+        'log':                  log,
         'offset':               args.offset,
         'outputDir':            args.outputDir,
         'cond':                 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&Receive_Email>0'
@@ -112,7 +127,7 @@ def main():
     # Wait for all threads to complete
     for t in threads:
         t.join()
-    print('Exiting main')
+    log.info('Exiting main')
 
 
 if __name__ == '__main__':
