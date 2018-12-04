@@ -75,21 +75,6 @@ The client that asked for this app needed to have a CSV file of supporters and t
 2018-12-04 15:54:22,779: SupporterTagReader_01 INFO     reading 500 from    1000
 2018-12-04 15:54:23,032: SupporterTagReader_01 INFO     reading 500 from    1500
 2018-12-04 15:54:23,286: SupporterTagReader_01 INFO     reading 500 from    2000
-2018-12-04 15:54:23,558: SupporterTagReader_01 INFO     reading 500 from    2500
-2018-12-04 15:54:23,817: SupporterTagReader_01 INFO     reading 500 from    3000
-2018-12-04 15:54:24,033: SupporterTagReader_01 INFO     reading 500 from    3500
-2018-12-04 15:54:24,234: SupporterTagReader_01 INFO     reading 500 from    4000
-2018-12-04 15:54:24,451: SupporterTagReader_01 INFO     reading 500 from    4500
-2018-12-04 15:54:24,701: SupporterTagReader_01 INFO     reading 500 from    5000
-2018-12-04 15:54:24,952: SupporterTagReader_01 INFO     reading 500 from    5500
-2018-12-04 15:54:25,204: SupporterTagReader_01 INFO     reading 500 from    6000
-2018-12-04 15:54:25,425: SupporterTagReader_01 INFO     reading 500 from    6500
-2018-12-04 15:54:25,666: SupporterTagReader_01 INFO     reading 500 from    7000
-2018-12-04 15:54:25,990: SupporterTagReader_01 INFO     reading 500 from    7500
-2018-12-04 15:54:26,267: SupporterTagReader_01 INFO     reading 500 from    8000
-2018-12-04 15:54:26,516: SupporterTagReader_01 INFO     reading 500 from    8500
-2018-12-04 15:54:26,884: SupporterTagReader_01 INFO     reading 500 from    9000
-2018-12-04 15:54:27,156: SupporterTagReader_01 INFO     reading 500 from    9500
     .
     .
     .
