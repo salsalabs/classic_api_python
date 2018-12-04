@@ -60,12 +60,15 @@ optional arguments:
 The client that asked for this app needed to have a CSV file of supporters and the three tag groups described in the Backgroun section.  There are the steps to make that happen.
 
 1. Remove the `data` directory.  This is important.
+
 ```rm -rf data```
 
 1. Execute the app.
+
 ```python3 tags/app.py --login my_login.yaml```
 
 1. You'll see a log file like this.
+
 ```
 2018-12-04 15:54:22,185: SupporterTagReader_01 INFO     reading 500 from       0
 2018-12-04 15:54:22,526: SupporterTagReader_01 INFO     reading 500 from     500
@@ -92,19 +95,25 @@ The client that asked for this app needed to have a CSV file of supporters and t
     .
 2018-12-04 15:57:09,242: SupporterTagReader_01 INFO     Ending  SupporterTagReader
 ```
+
 1. Manuallly terminate the app when the logging stops.  Type control-C repeatedly until you see the shell prompt. (TODO: Make the danged app stop itself.)
 
 1. Go to the data directory.
+
 ```cd data```
 
 1. Merge all of the supporter_tag files sinto a single file named `data.csv`.  This, too, is important.
+
 ```cat supportertag*.csv > data.csv```
 
 1. Use SQLIte3 to create the result CSV file.  
-```sqlite3```
+
+```sqlite3 --init ../tags/ncwarn_export_prep.sql```
 
 1. You'll see something like this.
-```-- Loading resources from ../tags/ncwarn_export_prep.sql
+
+```
+-- Loading resources from ../tags/ncwarn_export_prep.sql
 58867
 10500
 SQLite version 3.19.3 2017-06-27 16:48:08
