@@ -104,16 +104,16 @@ create table EventTags as
 		Email,
 		group_concat(Prefix||":"||Tag) as Tags
 		from d
-	where Prefix = "event"
+	where Prefix in ("event", "Event")
 	group by supporter_KEY, Email;
 
 drop table if exists OtherTags;
 create table OtherTags
 	as select supporter_KEY,
 		Email,
-		group_concat(Prefix||":"||Tag) as Tags
+		group_concat(Tag) as Tags
 		from d
-	where Prefix not in ("action", "event")
+	where Prefix is null
 	group by supporter_KEY, Email;
 
 drop table if exists results;
