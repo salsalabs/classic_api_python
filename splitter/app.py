@@ -106,30 +106,30 @@ def main():
         'log':                  log,
         'offset':               args.offset,
         'outputDir':            args.outputDir,
-        'cond':                 'Email IS NOT EMPTY&condition=EMAIL LIKE %@%.%&Receive_Email>0'
+        'cond':                 'supporter_KEY>0'
     }
   
     # List of threads to start. This is an ordered list.  The order assures that
     # queues are open for reading before anyone tries to send to it.
     tasks = [
-      DonationSaver,
-      GroupSaver,
-      SupporterSaver,
-      DonationReader,
-      GroupsReader,
-      SupporterReader]
+        { 't': DonationSaver,   'n': 1 },
+        { 't': GroupSaver,      'n': 1 },
+        { 't': SupporterSaver,  'n': 1 },
+        { 't': DonationReader,  'n': 10 },
+        { 't': GroupsReader,    'n': 1 },
+        { 't': SupporterReader, 'n': 1 }
+    ]
     
     for task in tasks:
-        t = task(**kwargs)
-        t.start()
-        threads.append(t)
+        for id in range (0, task['n']):
+            kwargs['threadID'] = id + 1
+            t = task['t'](**kwargs)
+            t.start()
+            threads.append(t)
 
     # Wait for all threads to complete
     for t in threads:
-        try:
-            t.join()
-        except KeyboardInterrupt:
-            pass
+        t.join()
     log.info('Exiting main')
     exit(0)
 
