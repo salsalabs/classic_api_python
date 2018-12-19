@@ -51,15 +51,19 @@ class DonationReader (ReaderBase):
         to the downstream supporter saver. 
         """
 
+        count = 0
         while not self.exitFlag:
             supporter = self.donationQueue.get()
-            # self.log.info(f"{self.donationQueue.qsize()} queued")
             if not supporter:
                 continue
+            if self.donationQueue.qsize() - count > 100:
+                self.log.info(f"popped {supporter['supporter_KEY']}")
+                count = self.donationQueue.qsize()
             offset = 0
             count = 500
+            cond = f"supporter_KEY={supporter['supporter_KEY']}&condition=RESULT IN 0,-1"
+
             while count == 500:
-                cond = f"supporter_KEY={supporter['supporter_KEY']}&condition=RESULT IN 0,-1"
                 payload = {'json': True,
                            "limit": f"{offset},{count}",
                            'object': 'donation',
