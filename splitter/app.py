@@ -126,9 +126,12 @@ def main():
 
     # Wait for all threads to complete
     for t in threads:
-        t.join()
+        try:
+            t.join()
+        except KeyboardInterrupt:
+            pass
     log.info('Exiting main')
-
+    exit(0)
 
 if __name__ == '__main__':
     main()
