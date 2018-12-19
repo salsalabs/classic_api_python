@@ -17,7 +17,7 @@ class LockedQueue:
         self.lock.acquire()
         p = None
         if not self.q.empty():
-            p = self.q.get()
+            p = self.q.get(True, 1000)
             self.lock.release()
         else:
             self.lock.release()
@@ -28,3 +28,6 @@ class LockedQueue:
         self.lock.acquire()
         self.q.put(p)
         self.lock.release()
+
+    def qsize(self):
+        return self.q.qsize()

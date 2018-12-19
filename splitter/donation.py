@@ -7,9 +7,9 @@ import os.path
 import pathlib
 import threading
 
-from base import SaverBase
+from base import ReaderBase, SaverBase
 
-class DonationReader (threading.Thread):
+class DonationReader (ReaderBase):
     """Read supporters from a queue, find the donations for the supporters, 
     then write donation records records to the output queue."""
 
@@ -27,18 +27,7 @@ class DonationReader (threading.Thread):
         :supporterSaveQueue:      queue to receive inactive supporters with donation history
         :exitFlag:      boolean that's true when processing should stop
         """
-
-        threading.Thread.__init__(self)
-        self.__dict__.update(kwargs)
-        self.threadName = type(self).__name__
-        
-        logName = f"{self.threadName}_{self.threadID:02d}"
-        self.log = logging.getLogger(logName)
-        console = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s: %(name)-18s %(levelname)-8s %(message)s')
-        console.setFormatter(formatter)
-        console.setLevel(logging.DEBUG)
-        self.log.addHandler(console)
+        ReaderBase.__init__(self, **kwargs)
 
         x = []
         for k, v in DonationMap.items():
@@ -64,6 +53,7 @@ class DonationReader (threading.Thread):
 
         while not self.exitFlag:
             supporter = self.donationQueue.get()
+            # self.log.info(f"{self.donationQueue.qsize()} queued")
             if not supporter:
                 continue
             offset = 0
@@ -107,8 +97,13 @@ class DonationReader (threading.Thread):
                             if k == "Transaction_Date":
                                 x = str.split(d[k], " GMT")[0]
                                 f = "%a %b %d %Y %H:%M:%S"
-                                x = datetime.datetime.strptime(x, f)
-                                d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
+                                try:
+                                    x = datetime.datetime.strptime(x, f)
+                                    d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
+                                except ValueError as e:
+                                    self.log.warn(str(e))
+                                    
+                                    
                     self.donationSaveQueue.put(d)
 
 

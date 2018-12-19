@@ -5,9 +5,9 @@ import os.path
 import pathlib
 import threading
 
-from base import SaverBase
+from base import ReaderBase, SaverBase
 
-class GroupsReader (threading.Thread):
+class GroupsReader (ReaderBase):
     """
     Read supporters from a queue, find the groups that the supporter belongs
     to, then write individual (group_Name, email) records to the groupsEmailQueueput queue.
@@ -27,18 +27,7 @@ class GroupsReader (threading.Thread):
         :groupsEmailQueue:    queue to write to read and save groups
         :exitFlag:      boolean flag to indicate that processing has completed
         """
-
-        threading.Thread.__init__(self)
-        self.__dict__.update(kwargs)
-        self.threadName = type(self).__name__
-        
-        logName = f"{self.threadName}_{self.threadID:02d}"
-        self.log = logging.getLogger(logName)
-        console = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s: %(name)-18s %(levelname)-8s %(message)s')
-        console.setFormatter(formatter)
-        console.setLevel(logging.DEBUG)
-        self.log.addHandler(console)
+        ReaderBase.__init__(self, **kwargs)
 
     def run(self):
         """

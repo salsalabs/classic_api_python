@@ -25,7 +25,18 @@ class Base(threading.Thread):
         console.setFormatter(formatter)
         console.setLevel(logging.DEBUG)
         self.log.addHandler(console)
-    
+
+class ReaderBase(Base):
+    '''
+    Base class inherited by Reader classes.
+    '''
+    def __init__(self, **kwargs):
+        '''
+        Initialize a ReaderBase by applying the keyword arguments,
+        and setting instance variables used when writing files. 
+        '''
+        Base.__init__(self, **kwargs)
+
 class SaverBase(Base):
     '''
     Base class inherited by Saver classes.

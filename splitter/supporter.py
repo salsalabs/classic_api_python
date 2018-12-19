@@ -5,9 +5,9 @@ import os.path
 import pathlib
 import threading
 
-from base import SaverBase
+from base import ReaderBase, SaverBase
 
-class SupporterReader (threading.Thread):
+class SupporterReader (ReaderBase):
     """
     Read supporter records at a nominal rate of 500 per chunk. Output them
     singly to the output queues.
@@ -29,18 +29,7 @@ class SupporterReader (threading.Thread):
         :start:    starting offset in the Salsa database
         :exitFlag: boolean indicating when processing should stop
         """
-
-        threading.Thread.__init__(self)
-        self.__dict__.update(kwargs)
-        self.threadName = type(self).__name__
-        
-        logName = f"{self.threadName}_{self.threadID:02d}"
-        self.log = logging.getLogger(logName)
-        console = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s: %(name)-18s %(levelname)-8s %(message)s')
-        console.setFormatter(formatter)
-        console.setLevel(logging.DEBUG)
-        self.log.addHandler(console)
+        ReaderBase.__init__(self, **kwargs)
 
         x = []
         for k, v in SupporterMap.items():
@@ -62,7 +51,6 @@ class SupporterReader (threading.Thread):
         Read supporters from the database.  Queue them up individually
         to the output queue(s).
         """
-
         offset = self.offset
         count = 500
         while count == 500:
