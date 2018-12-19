@@ -5,7 +5,7 @@ import os.path
 import pathlib
 import threading
 
-from saver_base import SaverBase
+from base import SaverBase
 
 class GroupsReader (threading.Thread):
     """

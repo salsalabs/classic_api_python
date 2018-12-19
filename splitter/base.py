@@ -5,26 +5,19 @@ import os.path
 import pathlib
 import threading
 
-class SaverBase (threading.Thread):
+class Base(threading.Thread):
     '''
-    Base class inherited by Saver classes.
+    Base class inherited by reader- and saver-base classes.
     '''
-
+    
     def __init__(self, **kwargs):
         '''
-        Initialize a SaverBase by applying the keyword arguments,
-        and setting instance variables used when writing files. 
+        Base class to set up threading and logging.
         '''
-
         threading.Thread.__init__(self)
         self.__dict__.update(kwargs)
 
         self.threadName = type(self).__name__
-        self.fileRoot = self.threadName.replace('Saver', '').replace('Reader','' ).lower()
-        self.csvfile = None
-        self.maxRecs = 50000
-        self.fileNum = 1
-
         logName = f'{self.threadName}_{self.threadID:02d}'
         self.log = logging.getLogger(logName)
         console = logging.StreamHandler()
@@ -32,6 +25,21 @@ class SaverBase (threading.Thread):
         console.setFormatter(formatter)
         console.setLevel(logging.DEBUG)
         self.log.addHandler(console)
+    
+class SaverBase(Base):
+    '''
+    Base class inherited by Saver classes.
+    '''
+    def __init__(self, **kwargs):
+        '''
+        Initialize a SaverBase by applying the keyword arguments,
+        and setting instance variables used when writing files. 
+        '''
+        Base.__init__(self, **kwargs)
+        self.fileRoot = self.threadName.replace('Saver', '').replace('Reader','' ).lower()
+        self.csvfile = None
+        self.maxRecs = 50000
+        self.fileNum = 1
 
     def getField(self):
         '''
@@ -86,5 +94,4 @@ class SaverBase (threading.Thread):
         Read records from a queue and write them to a CSV file.  You *must* 
         override this method.
         '''
-
         sys.exit(f'Error: you MUST override SaverBase.process_data in {self.threadName}')

@@ -7,7 +7,7 @@ import os.path
 import pathlib
 import threading
 
-from saver_base import SaverBase
+from base import SaverBase
 
 class DonationReader (threading.Thread):
     """Read supporters from a queue, find the donations for the supporters, 
