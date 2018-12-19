@@ -17,10 +17,8 @@ class LockedQueue:
         self.lock.acquire()
         p = None
         if not self.q.empty():
-            p = self.q.get(True, 1000)
-            self.lock.release()
-        else:
-            self.lock.release()
+            p = self.q.get()
+        self.lock.release()
         return p
 
     def put(self, p):
