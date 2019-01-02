@@ -111,3 +111,10 @@ logins
 *.csv
 *.txt
 *.html
+
+# Files from python3 -m venv
+bin/activate*
+bin/easy*
+bin/pip*
+bin/chard*
+bin/python*
