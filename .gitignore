@@ -118,3 +118,10 @@ bin/easy*
 bin/pip*
 bin/chard*
 bin/python*
+
+# Lots of stuff got added with ipython.
+bin/*
+etc/*
+lib/*
+man/*
+share/*
