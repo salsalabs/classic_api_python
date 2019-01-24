@@ -11,5 +11,6 @@ requests = "*"
 json = "*"
 pyyaml = "*"
 multidict = "*"
+pdfkit = "*"
 
 [dev-packages]
