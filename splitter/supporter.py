@@ -16,9 +16,9 @@ class SupporterReader (ReaderBase):
     def __init__(self, **kwargs):
         """
         Initialize a SupporterReader object
-        
+
         Params in kwargs:
-        
+
         :threadID: numeric cardinal thread identifier
         :cred:     login credentials (from the YAML file)
         :session:  requests object to read from Salsa
@@ -69,7 +69,7 @@ class SupporterReader (ReaderBase):
                 if supporter["Receive_Email"] != "Unsubscribed":
                     self.supporterSaveQueue.put(supporter)
                     # Donations processor will write donation records for all supporters
-                    # with emails.  Donations will queue up supporter records for 
+                    # with emails.  Donations will queue up supporter records for
                     # supporters with donation history.
                     self.donationQueue.put(supporter)
                 self.groupsQueue.put(supporter)
@@ -131,54 +131,49 @@ class SupporterSaver (SaverBase):
                 count = count + 1
             except UnicodeEncodeError:
                 self.log.error(f"{self.threadName}_{self.threadID:02d}: UnicodeEncodeError on {supporter}")
-
+# QZ 25-Jan-2019
 SupporterMap = {
-    "ExternalID": "supporter_KEY",
-    "Email": "Email",
-    "AddressLine1": "Street",
-    "AddressLine2": "Street_2",
-    "CellPhone": "Cell_Phone",
-    "City": "City",
-    "Country": "Country", 
-    "DateOfBirth": None,
-    "SubscriptionStatus": "Receive_Email",
-    "FacebookID": None,
-    "FirstName": "First_Name",
-    "LastName": "Last_Name",
-    "Gender": None,
-    "HomePhone": "Phone",
-    "MiddleName": "MI",
-    "PostalCode": "Zip",
-    "PreferredLanguage": "Language_Code",
-    "State": "State",
-    "Suffix": "Suffix",
-    "Timezone": "Timezone",
-    "Title": "Title",
-    "TwitterID": None,
-    "WorkPhone": "Work_Phone"}
-
+        "email":           "Email",
+        "title":           "Title",
+        "firstName":       "First_Name",
+        "middleName":      "MI",
+        "lastName":        "Last_Name",
+        "suffix":          "Suffix",
+        "status":          "Receive_Email",
+        "addressLine1":    "Street",
+        "addressLine2":    "Street_2",
+        "city":            "City",
+        "state":           "State",
+        "country":         "Country",
+        "postalCode":      "Zip",
+        "homePhone":       "Phone",
+        "cellPhone":       "Cell_Phone",
+        "workPhone":       "Work_Phone",
+        "languageCode":    "Language_Code",
+        "externalID":      "supporter_KEY",
+        "supporter_KEY":   "supporter_KEY",
+        "Date_Created":    "Date_Created",
+        "Last_Modified":   "Last_Modified"
+}
 SupportMapOrder = [
-    "ExternalID",
-    "Email",
-    "Title",
-    "FirstName",
-    "MiddleName",
-    "LastName",
-    "Suffix",
-    "AddressLine1",
-    "AddressLine2",
-    "City",
-    "State",
-    "Country", 
-    "PostalCode",
-    "CellPhone",
-    "WorkPhone",
-    "SubscriptionStatus",
-    "DateOfBirth",
-    "FacebookID",
-    "Gender",
-    "HomePhone",
-    "PreferredLanguage",
-    "Timezone",
-    "TwitterID"
+    "externalID",
+    "email",
+    "status",
+    "title",
+    "firstName",
+    "middleName",
+    "lastName",
+    "suffix",
+    "addressLine1",
+    "addressLine2",
+    "city",
+    "state",
+    "country",
+    "postalCode",
+    "homePhone",
+    "cellPhone",
+    "workPhone",
+    "supporter_KEY",
+    "Date_Created",
+    "Last_Modified",
 ]

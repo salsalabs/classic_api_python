@@ -10,15 +10,15 @@ import threading
 from base import ReaderBase, SaverBase
 
 class DonationReader (ReaderBase):
-    """Read supporters from a queue, find the donations for the supporters, 
+    """Read supporters from a queue, find the donations for the supporters,
     then write donation records records to the output queue."""
 
     def __init__(self, **kwargs):
         """
         Initialize a DonationReader instance.
-        
+
         Parameters in kwargs:
-        
+
         :threadID:      thread number, generally cardinal
         :cred:          login credentials (from the YAML file)
         :session:       requests session to use to read from Salsa
@@ -48,7 +48,7 @@ class DonationReader (ReaderBase):
         """
         Read supporters from the supporter queue.  Retrieve donation records
         for the supporters.  If a supporter is not active, then write the record
-        to the downstream supporter saver. 
+        to the downstream supporter saver.
         """
 
         count = 0
@@ -57,7 +57,6 @@ class DonationReader (ReaderBase):
             if not supporter:
                 continue
             if self.donationQueue.qsize() - count > 100:
-                self.log.info(f"popped {supporter['supporter_KEY']}")
                 count = self.donationQueue.qsize()
             offset = 0
             count = 500
@@ -82,7 +81,7 @@ class DonationReader (ReaderBase):
                 # then send the supporter record to the supporter save queue.
                 if supporter['Receive_Email'] == "Unsubscribed":
                     self.supporterSaveQueue.put(supporter)
-    
+
                 # Iterate through the donations, transmogrify as needed, then put them onto
                 # the donation saver queue.
                 for donation in j:
@@ -106,8 +105,8 @@ class DonationReader (ReaderBase):
                                     d[k] = x.strftime("%Y-%m-%dT%H:%M:%S")
                                 except ValueError as e:
                                     self.log.warn(str(e))
-                                    
-                                    
+
+
                     self.donationSaveQueue.put(d)
 
 
