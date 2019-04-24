@@ -40,7 +40,7 @@ print('Authentication: ', j)
 
 
 
-# Read the HTML content from the email blast victim.
+# Read the HTML content from the supporter_action victim.
 payload = {'json': True,
     'object': 'supporter_action',
     'condition': 'action_KEY IN 15942,15943,18140,23426',
